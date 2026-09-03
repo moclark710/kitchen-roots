@@ -1,0 +1,21 @@
+# Python virtual environment
+.venv/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+
+# Testing cache
+.pytest_cache/
+
+# Local configuration and secrets
+.env
+
+# Local SQLite database files
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# macOS-generated files
+.DS_Store
