@@ -4,7 +4,7 @@ Kitchen Roots is a digital family recipe book for preserving family recipes toge
 
 ## Project Status
 
-Kitchen Roots is currently in the planning and foundation stage. The MVP specification and data model have been completed, and database development is the next phase.
+Kitchen Roots is currently in database development. The SQLite schema, initialization command, Jollof Rice development seed, and database relationship tests are available.
 
 ## MVP Features
 
@@ -38,7 +38,29 @@ Kitchen Roots will use a three-tier architecture consisting of a browser-based f
 
 ## Local Setup
 
-Local installation and startup instructions will be added when the application structure is created.
+Create an empty development database:
+
+```bash
+python3 database/init_db.py
+```
+
+Create the database and load the Jollof Rice development data:
+
+```bash
+python3 database/init_db.py --seed
+```
+
+For a quick Phase 2 demo, inspect the seeded recipe and its related record counts:
+
+```bash
+sqlite3 instance/kitchen_roots.db "SELECT title FROM recipe; SELECT COUNT(*) AS ingredients FROM recipe_ingredient; SELECT COUNT(*) AS steps FROM recipe_step;"
+```
+
+Run the database test suite:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
 
 ## Author
 
