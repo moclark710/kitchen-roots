@@ -62,6 +62,17 @@ Run the database test suite:
 python3 -m unittest discover -s tests -v
 ```
 
+## Run the first vertical slice
+
+Create the seeded development database, then start Flask:
+
+```bash
+python3 database/init_db.py --seed
+python3 app.py
+```
+
+Open <http://127.0.0.1:5000> to view the complete Jollof Rice recipe. The page requests recipe JSON from `GET /api/recipes/1` and renders its ingredients, ordered steps, tags, and notes.
+
 ## Author
 
 Monah Clark

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kitchen Roots | Recipe</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='recipe.css') }}">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">Kitchen Roots</a>
+      <span>Family recipes. Living history.</span>
+    </header>
+
+    <main id="recipe" class="recipe-shell" aria-live="polite">
+      <p class="loading">Loading recipe...</p>
+    </main>
+
+    <template id="recipe-template">
+      <article>
+        <header class="recipe-header">
+          <p class="eyebrow">From <span data-author></span>'s kitchen</p>
+          <h1 data-title></h1>
+          <p class="description" data-description></p>
+          <div class="tag-list" data-tags></div>
+        </header>
+
+        <div class="recipe-grid">
+          <section class="card ingredients-card">
+            <p class="section-label">What you'll need</p>
+            <h2>Ingredients</h2>
+            <ul class="ingredient-list" data-ingredients></ul>
+          </section>
+
+          <section class="card steps-card">
+            <p class="section-label">Make it</p>
+            <h2>Steps</h2>
+            <ol class="step-list" data-steps></ol>
+          </section>
+        </div>
+
+        <section class="story-section">
+          <p class="section-label">The roots of this recipe</p>
+          <h2>Stories &amp; notes</h2>
+          <div class="note-grid" data-notes></div>
+        </section>
+      </article>
+    </template>
+
+    <script src="{{ url_for('static', filename='recipe.js') }}"></script>
+  </body>
+</html>
