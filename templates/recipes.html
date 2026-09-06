@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kitchen Roots | Recipes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='recipe.css') }}">
+  </head>
+
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">Kitchen Roots</a>
+      <span>Family recipes. Living history.</span>
+    </header>
+
+    <main class="recipe-shell">
+      <header class="recipe-header">
+        <p class="eyebrow">Explore the collection</p>
+        <h1>Recipes</h1>
+        <p class="description">
+          Family recipes preserved with their stories, techniques, and roots.
+        </p>
+      </header>
+
+      <section>
+        <div id="recipe-list" class="recipe-list" aria-live="polite">
+          <p class="loading">Loading recipes...</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='recipes.js') }}"></script>
+  </body>
+</html>

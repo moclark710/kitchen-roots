@@ -1,4 +1,5 @@
 const recipeRoot = document.querySelector("#recipe");
+const recipeId = recipeRoot.dataset.recipeId;
 const recipeTemplate = document.querySelector("#recipe-template");
 
 function createTextElement(tagName, className, text) {
@@ -49,7 +50,7 @@ function renderRecipe(recipe) {
 
 async function loadRecipe() {
   try {
-    const response = await fetch("/api/recipes/1");
+    const response = await fetch(`/api/recipes/${recipeId}`);
     const data = await response.json();
 
     if (!response.ok) {

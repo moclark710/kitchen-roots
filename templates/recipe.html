@@ -12,7 +12,12 @@
       <span>Family recipes. Living history.</span>
     </header>
 
-    <main id="recipe" class="recipe-shell" aria-live="polite">
+    <main
+      id="recipe"
+      class="recipe-shell"
+      data-recipe-id="{{ recipe_id | default(1) }}"
+      aria-live="polite"
+    >
       <p class="loading">Loading recipe...</p>
     </main>
 

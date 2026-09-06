@@ -191,6 +191,46 @@ h3 {
   color: #8b2d20;
 }
 
+.recipe-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.recipe-card {
+  padding: 2rem;
+  border: 1px solid #cdbfa7;
+  border-radius: 1rem;
+  background: rgba(255, 252, 244, 0.72);
+}
+
+.recipe-card h2 {
+  margin: 0.75rem 0 1rem;
+  font-size: 2rem;
+}
+
+.recipe-card h2 a {
+  color: #173e2c;
+  text-decoration: none;
+}
+
+.recipe-card h2 a:hover {
+  color: #a24725;
+}
+
+.recipe-author {
+  color: #a24725;
+  font: 700 0.75rem Arial, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.recipe-card > p:last-child {
+  color: #51493d;
+  line-height: 1.6;
+}
+
+
 @media (max-width: 760px) {
   .site-header span {
     display: none;

@@ -60,6 +60,29 @@ class RecipeDetailSliceTests(unittest.TestCase):
         self.assertIn(b"Kitchen Roots", response.data)
         self.assertIn(b"recipe.js", response.data)
 
+    def test_recipe_list_api_returns_recipe_summaries(self):
+        response = self.client.get("/api/recipes")
+        recipes = response.get_json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(recipes), 1)
+        self.assertEqual(recipes[0]["title"], "Liberian Jollof Rice")
+        self.assertEqual(recipes[0]["user"]["name"], "KrugehCooks")
+        self.assertNotIn("ingredients", recipes[0])
+
+    def test_recipe_collection_page_loads_the_collection_frontend(self):
+        response = self.client.get("/recipes")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Loading recipes...", response.data)
+        self.assertIn(b"recipes.js", response.data)
+
+
+    def test_recipe_detail_page_includes_requested_recipe_id(self):
+        response = self.client.get("/recipes/1")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'data-recipe-id="1"', response.data)
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,44 @@
 import sqlite3
 
 
+def list_recipes(database_path):
+    """Return summary info for every recipe."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        recipes = connection.execute(
+            """
+            SELECT
+                recipe.id,
+                recipe.title,
+                recipe.description,
+                recipe.prep_time,
+                recipe.tier,
+                user.id AS user_id,
+                user.name AS user_name
+            FROM recipe
+            JOIN user ON user.id = recipe.user_id
+            ORDER BY recipe.title
+            """
+        ).fetchall()
+
+    return [
+        {
+            "id": recipe["id"],
+            "title": recipe["title"],
+            "description": recipe["description"],
+            "prep_time": recipe["prep_time"],
+            "tier": recipe["tier"],
+            "user": {
+                "id": recipe["user_id"],
+                "name": recipe["user_name"],
+            },
+        }
+        for recipe in recipes
+    ]
+
+
 def get_recipe(database_path, recipe_id):
     """Return one complete recipe as a dictionary, or None when it does not exist."""
     with sqlite3.connect(database_path) as connection:
