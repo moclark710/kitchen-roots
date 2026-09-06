@@ -121,3 +121,31 @@ def get_recipe(database_path, recipe_id):
         "tags": [dict(row) for row in tags],
         "notes": [dict(row) for row in notes],
     }
+
+
+def create_recipe(database_path, recipe_data):
+    """Create a recipe and return its complete saved representation."""
+    with sqlite3.connect(database_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        cursor = connection.execute(
+            """
+            INSERT INTO recipe (
+                title,
+                description,
+                user_id,
+                prep_time
+            )
+            VALUES (?, ?, ?, ?)
+            """,
+            (
+                recipe_data["title"],
+                recipe_data["description"],
+                recipe_data["user_id"],
+                recipe_data["prep_time"],
+            ),
+        )
+
+        recipe_id = cursor.lastrowid
+
+    return get_recipe(database_path, recipe_id)

@@ -230,6 +230,79 @@ h3 {
   line-height: 1.6;
 }
 
+.primary-link,
+.recipe-form button {
+  display: inline-block;
+  width: fit-content;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid #173e2c;
+  border-radius: 999px;
+  background: #173e2c;
+  color: #fffdf7;
+  font: 700 0.85rem Arial, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primary-link:hover,
+.recipe-form button:hover {
+  background: #a24725;
+  border-color: #a24725;
+}
+
+.primary-link:focus-visible,
+.recipe-form input:focus-visible,
+.recipe-form textarea:focus-visible,
+.recipe-form button:focus-visible {
+  outline: 3px solid #cb6f39;
+  outline-offset: 3px;
+}
+
+.recipe-form {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 720px;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid #cdbfa7;
+  border-radius: 1rem;
+  background: rgba(255, 252, 244, 0.72);
+}
+
+.recipe-form label {
+  margin-top: 0.75rem;
+  color: #173e2c;
+  font: 700 0.85rem Arial, sans-serif;
+}
+
+.recipe-form input,
+.recipe-form textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid #9c8061;
+  border-radius: 0.5rem;
+  background: #fffdf7;
+  color: #252219;
+  font: inherit;
+}
+
+.recipe-form textarea {
+  min-height: 10rem;
+  resize: vertical;
+}
+
+#form-message {
+  min-height: 1.5rem;
+  margin: 0;
+  color: #a24725;
+}
+
+.form-page {
+  width: min(820px, calc(100% - 2rem));
+}
+
+.form-page .recipe-form {
+  max-width: none;
+}
 
 @media (max-width: 760px) {
   .site-header span {

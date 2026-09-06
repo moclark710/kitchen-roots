@@ -76,6 +76,7 @@ class RecipeDetailSliceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Loading recipes...", response.data)
         self.assertIn(b"recipes.js", response.data)
+        self.assertIn(b'href="/recipes/new"', response.data)
 
 
     def test_recipe_detail_page_includes_requested_recipe_id(self):
@@ -83,6 +84,33 @@ class RecipeDetailSliceTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'data-recipe-id="1"', response.data)
+
+    def test_create_recipe_api_adds_a_recipe(self):
+        response = self.client.post(
+            "/api/recipes",
+            json={
+                "title": "Pepper Soup",
+                "description": "A warming West African soup.",
+                "prep_time": 45,
+                "user_id": 1,
+            },
+        )
+        recipe = response.get_json()
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(recipe["title"], "Pepper Soup")
+        self.assertEqual(recipe["description"], "A warming West African soup.")
+        self.assertEqual(recipe["prep_time"], 45)
+        self.assertEqual(recipe["tier"], "free")
+        self.assertEqual(recipe["user"]["id"], 1)
+
+    def test_new_recipe_page_loads_the_form(self):
+        response = self.client.get("/recipes/new")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Add a Recipe", response.data)
+        self.assertIn(b'recipe-form', response.data)
+        self.assertIn(b"create_recipe.js", response.data)
 
 if __name__ == "__main__":
     unittest.main()
