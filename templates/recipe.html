@@ -27,7 +27,22 @@
           <p class="eyebrow">From <span data-author></span>'s kitchen</p>
           <h1 data-title></h1>
           <p class="description" data-description></p>
+          <p class="recipe-meta">
+            <span>
+              Prep time: <strong data-prep-time></strong> minutes
+            </span>
+            <span>
+              Cook time: <strong data-cook-time></strong> minutes
+            </span>
+          </p>
           <div class="tag-list" data-tags></div>
+
+          <a
+            class="primary-link"
+            href="/recipes/{{ recipe_id | default(1) }}/edit"
+          >
+            Edit Recipe
+          </a>
         </header>
 
         <div class="recipe-grid">

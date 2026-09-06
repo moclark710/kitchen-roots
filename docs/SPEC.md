@@ -339,6 +339,7 @@ Example:
   "description": "A family-style Liberian rice dish.",
   "user_id": 1,
   "prep_time": 20,
+  "cook_time": 80,
   "tier": "free",
   "ingredients": [
     {
@@ -412,7 +413,7 @@ The Kitchen Roots database will follow the structure defined in Kitchen Roots UM
 | Table | Fields | Purpose |
 |---|---|---|
 | `User` | `id INTEGER PK`, `name TEXT`, `email TEXT`, `tier TEXT` | Stores Recipe owners |
-| `Recipe` | `id INTEGER PK`, `title TEXT`, `description TEXT`, `user_id INTEGER FK`, `prep_time INTEGER`, `tier TEXT` | Stores the main information for each Recipe |
+| `Recipe` | `id INTEGER PK`, `title TEXT`, `description TEXT`, `user_id INTEGER FK`, `prep_time INTEGER`, `cook_time INTEGER`, `tier TEXT` | Stores the main information for each Recipe |
 | `Ingredient` | `id INTEGER PK`, `name TEXT` | Stores reusable Ingredients |
 | `Recipe_Ingredient` | `recipe_id INTEGER PK/FK`, `ingredient_id INTEGER PK/FK`, `amount TEXT`, `unit TEXT` | Connects Recipes and Ingredients and records Recipe-specific measurements |
 | `Recipe_Step` | `id INTEGER PK`, `recipe_id INTEGER FK`, `step_number INTEGER`, `instruction TEXT` | Stores ordered cooking instructions |

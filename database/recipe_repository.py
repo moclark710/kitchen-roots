@@ -14,6 +14,7 @@ def list_recipes(database_path):
                 recipe.title,
                 recipe.description,
                 recipe.prep_time,
+                recipe.cook_time,
                 recipe.tier,
                 user.id AS user_id,
                 user.name AS user_name
@@ -28,6 +29,7 @@ def list_recipes(database_path):
             "id": recipe["id"],
             "title": recipe["title"],
             "description": recipe["description"],
+            "cook_time": recipe["cook_time"],
             "prep_time": recipe["prep_time"],
             "tier": recipe["tier"],
             "user": {
@@ -52,6 +54,7 @@ def get_recipe(database_path, recipe_id):
                 recipe.title,
                 recipe.description,
                 recipe.prep_time,
+                recipe.cook_time,
                 recipe.tier,
                 user.id AS user_id,
                 user.name AS user_name
@@ -114,6 +117,7 @@ def get_recipe(database_path, recipe_id):
         "title": recipe["title"],
         "description": recipe["description"],
         "prep_time": recipe["prep_time"],
+        "cook_time": recipe["cook_time"],
         "tier": recipe["tier"],
         "user": {"id": recipe["user_id"], "name": recipe["user_name"]},
         "ingredients": [dict(row) for row in ingredients],
@@ -134,18 +138,54 @@ def create_recipe(database_path, recipe_data):
                 title,
                 description,
                 user_id,
-                prep_time
+                prep_time,
+                cook_time
             )
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
             """,
             (
                 recipe_data["title"],
                 recipe_data["description"],
                 recipe_data["user_id"],
                 recipe_data["prep_time"],
+                recipe_data["cook_time"],
             ),
         )
 
         recipe_id = cursor.lastrowid
+
+    return get_recipe(database_path, recipe_id)
+
+
+def update_recipe(database_path, recipe_id, recipe_data):
+    """Update a recipe and return it, or None when it does not exist."""
+    with sqlite3.connect(database_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        cursor = connection.execute(
+            """
+            UPDATE recipe
+            SET
+                title = COALESCE(?, title),
+                description = COALESCE(?, description),
+                user_id = COALESCE(?, user_id),
+                prep_time = COALESCE(?, prep_time),
+                cook_time = COALESCE(?, cook_time),
+                tier = COALESCE(?, tier)
+            WHERE id = ?
+            """,
+            (
+                recipe_data.get("title"),
+                recipe_data.get("description"),
+                recipe_data.get("user_id"),
+                recipe_data.get("prep_time"),
+                recipe_data.get("cook_time"),
+                recipe_data.get("tier"),
+                recipe_id,
+            ),
+        )
+
+        if cursor.rowcount == 0:
+            return None
 
     return get_recipe(database_path, recipe_id)

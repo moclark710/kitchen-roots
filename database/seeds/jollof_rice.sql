@@ -6,13 +6,22 @@ BEGIN TRANSACTION;
 INSERT INTO user (id, name, email, tier)
 VALUES (1, 'KrugehCooks', 'demo@kitchenroots.local', 'free');
 
-INSERT INTO recipe (id, title, description, user_id, prep_time, tier)
+INSERT INTO recipe (
+    id,
+    title,
+    description,
+    user_id,
+    prep_time,
+    cook_time,
+    tier
+)
 VALUES (
     1,
     'Liberian Jollof Rice',
     'A bold Liberian-style jollof rice made with a tomato-pepper base, long-grain rice, assorted meats, and vegetables in one large pot.',
     1,
-    0,
+    20,
+    80,
     'free'
 );
 

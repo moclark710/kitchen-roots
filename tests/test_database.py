@@ -55,6 +55,7 @@ class DatabaseTests(unittest.TestCase):
                 "title",
                 "description",
                 "user_id",
+                "cook_time",
                 "prep_time",
                 "tier",
             },

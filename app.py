@@ -1,6 +1,11 @@
 from pathlib import Path
 from flask import Flask, jsonify, render_template, request
-from database.recipe_repository import create_recipe, get_recipe, list_recipes
+from database.recipe_repository import (
+    create_recipe,
+    get_recipe,
+    list_recipes,
+    update_recipe,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
@@ -21,6 +26,7 @@ def create_app(test_config=None):
     @app.get("/recipes/<int:recipe_id>")
     def recipe_detail_page(recipe_id):
         return render_template("recipe.html", recipe_id=recipe_id)
+
     @app.get("/")
     def recipe_page():
         return render_template("recipe.html")
@@ -49,6 +55,27 @@ def create_app(test_config=None):
         if recipe is None:
             return jsonify(error="Recipe not found."), 404
         return jsonify(recipe)
+
+    @app.patch("/api/recipes/<int:recipe_id>")
+    def recipe_update(recipe_id):
+        recipe_data = request.get_json()
+        recipe = update_recipe(
+            app.config["DATABASE_PATH"],
+            recipe_id,
+            recipe_data,
+        )
+
+        if recipe is None:
+            return jsonify(error="Recipe not found."), 404
+
+        return jsonify(recipe)
+
+    @app.get("/recipes/<int:recipe_id>/edit")
+    def edit_recipe_page(recipe_id):
+        return render_template(
+            "edit_recipe.html",
+            recipe_id=recipe_id,
+        )
 
     return app
 

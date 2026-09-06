@@ -12,6 +12,7 @@ recipeForm.addEventListener("submit", async (event) => {
     title: formData.get("title").trim(),
     description: formData.get("description").trim(),
     prep_time: Number(formData.get("prep_time")),
+    cook_time: Number(formData.get("cook_time")),
     user_id: Number(formData.get("user_id")),
   };
 

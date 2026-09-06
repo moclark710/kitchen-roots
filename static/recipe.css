@@ -304,6 +304,18 @@ h3 {
   max-width: none;
 }
 
+.recipe-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  color: #625744;
+  font-family: Arial, sans-serif;
+}
+
+.recipe-header > .primary-link {
+  margin-top: 1.5rem;
+}
+
 @media (max-width: 760px) {
   .site-header span {
     display: none;

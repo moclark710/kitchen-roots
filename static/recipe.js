@@ -15,6 +15,8 @@ function renderRecipe(recipe) {
   page.querySelector("[data-author]").textContent = recipe.user.name;
   page.querySelector("[data-title]").textContent = recipe.title;
   page.querySelector("[data-description]").textContent = recipe.description;
+  page.querySelector("[data-prep-time]").textContent = recipe.prep_time;
+  page.querySelector("[data-cook-time]").textContent = recipe.cook_time;
 
   const tags = page.querySelector("[data-tags]");
   recipe.tags.forEach((tag) => {

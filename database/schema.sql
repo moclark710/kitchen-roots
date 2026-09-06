@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS recipe (
     description TEXT NOT NULL,
     user_id INTEGER NOT NULL,
     prep_time INTEGER NOT NULL CHECK (prep_time >= 0),
+    cook_time INTEGER NOT NULL DEFAULT 0 CHECK (cook_time >= 0),
     tier TEXT NOT NULL DEFAULT 'free',
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
