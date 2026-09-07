@@ -89,6 +89,7 @@ class RecipeDetailSliceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'data-recipe-id="1"', response.data)
         self.assertIn(b'href="/recipes/1/edit"', response.data)
+        self.assertIn(b"data-delete-button", response.data)
 
     def test_create_recipe_api_adds_a_recipe(self):
         response = self.client.post(
@@ -157,6 +158,25 @@ class RecipeDetailSliceTests(unittest.TestCase):
         self.assertIn(b'data-recipe-id="1"', response.data)
         self.assertIn(b"edit_recipe.js", response.data)
         self.assertIn(b'name="cook_time"', response.data)
+
+    def test_delete_recipe_api_removes_the_recipe(self):
+        response = self.client.delete("/api/recipes/1")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.data, b"")
+
+        missing_response = self.client.get("/api/recipes/1")
+
+        self.assertEqual(missing_response.status_code, 404)
+
+    def test_delete_missing_recipe_returns_json_404(self):
+        response = self.client.delete("/api/recipes/999")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Recipe not found."},
+        )
 
 if __name__ == "__main__":
     unittest.main()

@@ -189,3 +189,17 @@ def update_recipe(database_path, recipe_id, recipe_data):
             return None
 
     return get_recipe(database_path, recipe_id)
+
+
+def delete_recipe(database_path, recipe_id):
+    """Delete a recipe and report whether it existed."""
+    with sqlite3.connect(database_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        cursor = connection.execute(
+            "DELETE FROM recipe WHERE id = ?",
+            (recipe_id,),
+        )
+        recipe_was_deleted = cursor.rowcount > 0
+
+        return recipe_was_deleted

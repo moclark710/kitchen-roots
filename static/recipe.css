@@ -312,8 +312,31 @@ h3 {
   font-family: Arial, sans-serif;
 }
 
-.recipe-header > .primary-link {
+.recipe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   margin-top: 1.5rem;
+}
+
+.danger-button {
+  padding: 0.8rem 1.2rem;
+  border: 1px solid #8b2d20;
+  border-radius: 999px;
+  background: transparent;
+  color: #8b2d20;
+  font: 700 0.85rem Arial, sans-serif;
+  cursor: pointer;
+}
+
+.danger-button:hover {
+  background: #8b2d20;
+  color: #fffdf7;
+}
+
+.danger-button:focus-visible {
+  outline: 3px solid #cb6f39;
+  outline-offset: 3px;
 }
 
 @media (max-width: 760px) {

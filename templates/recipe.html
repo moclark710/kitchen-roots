@@ -37,12 +37,22 @@
           </p>
           <div class="tag-list" data-tags></div>
 
-          <a
-            class="primary-link"
-            href="/recipes/{{ recipe_id | default(1) }}/edit"
-          >
-            Edit Recipe
-          </a>
+          <div class="recipe-actions">
+            <a
+              class="primary-link"
+              href="/recipes/{{ recipe_id | default(1) }}/edit"
+            >
+              Edit Recipe
+            </a>
+
+            <button
+              class="danger-button"
+              type="button"
+              data-delete-button
+            >
+              Delete Recipe
+            </button>
+          </div>
         </header>
 
         <div class="recipe-grid">

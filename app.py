@@ -2,6 +2,7 @@ from pathlib import Path
 from flask import Flask, jsonify, render_template, request
 from database.recipe_repository import (
     create_recipe,
+    delete_recipe,
     get_recipe,
     list_recipes,
     update_recipe,
@@ -69,6 +70,18 @@ def create_app(test_config=None):
             return jsonify(error="Recipe not found."), 404
 
         return jsonify(recipe)
+
+    @app.delete("/api/recipes/<int:recipe_id>")
+    def recipe_delete(recipe_id):
+        recipe_was_deleted = delete_recipe(
+            app.config["DATABASE_PATH"],
+            recipe_id,
+        )
+
+        if not recipe_was_deleted:
+            return jsonify(error="Recipe not found."), 404
+
+        return "", 204
 
     @app.get("/recipes/<int:recipe_id>/edit")
     def edit_recipe_page(recipe_id):

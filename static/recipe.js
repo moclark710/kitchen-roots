@@ -47,7 +47,28 @@ function renderRecipe(recipe) {
     notes.append(card);
   });
 
+  const deleteButton = page.querySelector("[data-delete-button]");
+  deleteButton.addEventListener("click", deleteCurrentRecipe);
+
   recipeRoot.replaceChildren(page);
+}
+
+async function deleteCurrentRecipe() {
+  const confirmed = window.confirm(
+    "Delete this recipe? This action cannot be undone.",
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const response = await fetch(`/api/recipes/${recipeId}`, {
+    method: "DELETE",
+  });
+
+  if (response.ok) {
+    window.location.href = "/recipes";
+  }
 }
 
 async function loadRecipe() {
