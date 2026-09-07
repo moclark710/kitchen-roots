@@ -56,12 +56,13 @@ class RecipeDetailSliceTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.get_json(), {"error": "Recipe not found."})
 
-    def test_home_page_loads_the_recipe_frontend(self):
+    def test_home_page_loads_the_landing_page_with_navigation(self):
         response = self.client.get("/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Kitchen Roots", response.data)
-        self.assertIn(b"recipe.js", response.data)
+        self.assertIn(b"Family recipes carry more than ingredients.", response.data)
+        self.assertIn(b'href="/recipes"', response.data)
+        self.assertIn(b'href="/recipes/new"', response.data)
 
     def test_recipe_list_api_returns_recipe_summaries(self):
         response = self.client.get("/api/recipes")

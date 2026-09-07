@@ -339,6 +339,64 @@ h3 {
   outline-offset: 3px;
 }
 
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  font: 700 0.9rem Arial, sans-serif;
+}
+
+.site-nav a {
+  color: #173e2c;
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  color: #a24725;
+}
+
+.site-nav a:focus-visible {
+  outline: 3px solid #cb6f39;
+  outline-offset: 3px;
+}
+
+.landing-shell {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: clamp(4rem, 10vw, 8rem) 0;
+}
+
+.landing-hero {
+  max-width: 900px;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.secondary-link {
+  display: inline-block;
+  width: fit-content;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid #173e2c;
+  border-radius: 999px;
+  color: #173e2c;
+  font: 700 0.85rem Arial, sans-serif;
+  text-decoration: none;
+}
+
+.secondary-link:hover {
+  background: #eee2cb;
+}
+
+.secondary-link:focus-visible {
+  outline: 3px solid #cb6f39;
+  outline-offset: 3px;
+}
+
 @media (max-width: 760px) {
   .site-header span {
     display: none;
@@ -347,5 +405,19 @@ h3 {
   .recipe-grid,
   .note-grid {
     grid-template-columns: 1fr;
+  }
+
+  .site-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .site-nav {
+    gap: 0.75rem 1rem;
+  }
+
+  .landing-shell {
+    padding: 3rem 0;
   }
 }

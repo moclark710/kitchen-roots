@@ -86,8 +86,8 @@ def create_app(test_config=None):
         return render_template("recipe.html", recipe_id=recipe_id)
 
     @app.get("/")
-    def recipe_page():
-        return render_template("recipe.html")
+    def landing_page():
+        return render_template("landing.html")
 
     @app.get("/api/recipes")
     def recipe_list():
