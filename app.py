@@ -2,10 +2,16 @@ import sqlite3
 from pathlib import Path
 from flask import Flask, jsonify, render_template, request
 from database.recipe_repository import (
+    attach_recipe_ingredient,
+    attach_recipe_note,
+    attach_recipe_tag,
     create_recipe,
     delete_recipe,
     get_recipe,
     list_recipes,
+    remove_recipe_ingredient,
+    remove_recipe_note,
+    remove_recipe_tag,
     update_recipe,
 )
 
@@ -112,6 +118,75 @@ def create_app(test_config=None):
         if recipe is None:
             return jsonify(error="Recipe not found."), 404
         return jsonify(recipe)
+
+    @app.post("/api/recipes/<int:recipe_id>/ingredients")
+    def recipe_ingredient_create(recipe_id):
+        ingredient_data = request.get_json(silent=True)
+        ingredient = attach_recipe_ingredient(
+            app.config["DATABASE_PATH"],
+            recipe_id,
+            ingredient_data,
+        )
+        return jsonify(ingredient), 201
+
+    @app.delete("/api/recipes/<int:recipe_id>/ingredients/<int:ingredient_id>")
+    def recipe_ingredient_delete(recipe_id, ingredient_id):
+        relationship_was_deleted = remove_recipe_ingredient(
+            app.config["DATABASE_PATH"],
+            recipe_id,
+            ingredient_id,
+        )
+
+        if not relationship_was_deleted:
+            return jsonify(error="Recipe ingredient not found."), 404
+
+        return "", 204
+
+    @app.post("/api/recipes/<int:recipe_id>/tags")
+    def recipe_tag_create(recipe_id):
+        tag_data = request.get_json(silent=True)
+        tag = attach_recipe_tag(
+            app.config["DATABASE_PATH"],
+            recipe_id,
+            tag_data["tag_id"],
+        )
+        return jsonify(tag), 201
+
+    @app.delete("/api/recipes/<int:recipe_id>/tags/<int:tag_id>")
+    def recipe_tag_delete(recipe_id, tag_id):
+        relationship_was_deleted = remove_recipe_tag(
+            app.config["DATABASE_PATH"],
+            recipe_id,
+            tag_id,
+        )
+
+        if not relationship_was_deleted:
+            return jsonify(error="Recipe tag not found."), 404
+
+        return "", 204
+
+    @app.post("/api/recipes/<int:recipe_id>/notes")
+    def recipe_note_create(recipe_id):
+        note_data = request.get_json(silent=True)
+        note = attach_recipe_note(
+            app.config["DATABASE_PATH"],
+            recipe_id,
+            note_data["note_id"],
+        )
+        return jsonify(note), 201
+
+    @app.delete("/api/recipes/<int:recipe_id>/notes/<int:note_id>")
+    def recipe_note_delete(recipe_id, note_id):
+        relationship_was_deleted = remove_recipe_note(
+            app.config["DATABASE_PATH"],
+            recipe_id,
+            note_id,
+        )
+
+        if not relationship_was_deleted:
+            return jsonify(error="Recipe note not found."), 404
+
+        return "", 204
 
     @app.patch("/api/recipes/<int:recipe_id>")
     def recipe_update(recipe_id):

@@ -299,6 +299,66 @@ class RecipeDetailSliceTests(unittest.TestCase):
             {"error": "Recipe data is required."},
         )
 
+    def test_attach_ingredient_api_adds_it_to_the_recipe(self):
+        with sqlite3.connect(self.database_path) as connection:
+            connection.execute(
+                """
+                INSERT INTO ingredient (id, name)
+                VALUES (?, ?)
+                """,
+                (15, "Fresh ginger"),
+            )
+
+        response = self.client.post(
+            "/api/recipes/1/ingredients",
+            json={
+                "ingredient_id": 15,
+                "amount": "1",
+                "unit": "tbsp",
+            },
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response.get_json(),
+            {
+                "id": 15,
+                "name": "Fresh ginger",
+                "amount": "1",
+                "unit": "tbsp",
+            },
+        )
+
+        saved_recipe = self.client.get("/api/recipes/1").get_json()
+        ingredient_ids = [
+            ingredient["id"]
+            for ingredient in saved_recipe["ingredients"]
+        ]
+        self.assertIn(15, ingredient_ids)
+
+    def test_remove_ingredient_api_removes_only_the_recipe_relationship(self):
+        response = self.client.delete(
+            "/api/recipes/1/ingredients/14"
+        )
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.data, b"")
+
+        saved_recipe = self.client.get("/api/recipes/1").get_json()
+        ingredient_ids = [
+            ingredient["id"]
+            for ingredient in saved_recipe["ingredients"]
+        ]
+        self.assertNotIn(14, ingredient_ids)
+
+        with sqlite3.connect(self.database_path) as connection:
+            reusable_ingredient = connection.execute(
+                "SELECT name FROM ingredient WHERE id = ?",
+                (14,),
+            ).fetchone()
+
+        self.assertIsNotNone(reusable_ingredient)
+
     def test_edit_recipe_page_includes_requested_recipe_id(self):
         response = self.client.get("/recipes/1/edit")
 
@@ -307,6 +367,96 @@ class RecipeDetailSliceTests(unittest.TestCase):
         self.assertIn(b'data-recipe-id="1"', response.data)
         self.assertIn(b"edit_recipe.js", response.data)
         self.assertIn(b'name="cook_time"', response.data)
+
+    def test_tag_relationship_api_attaches_and_removes_a_reusable_tag(self):
+        with sqlite3.connect(self.database_path) as connection:
+            connection.execute(
+                """
+                INSERT INTO tag (id, name, type)
+                VALUES (?, ?, ?)
+                """,
+                (5, "Spicy", "flavor"),
+            )
+
+        attach_response = self.client.post(
+            "/api/recipes/1/tags",
+            json={"tag_id": 5},
+        )
+
+        self.assertEqual(attach_response.status_code, 201)
+        self.assertEqual(
+            attach_response.get_json(),
+            {
+                "id": 5,
+                "name": "Spicy",
+                "type": "flavor",
+            },
+        )
+
+        remove_response = self.client.delete(
+            "/api/recipes/1/tags/5"
+        )
+        self.assertEqual(remove_response.status_code, 204)
+
+        saved_recipe = self.client.get("/api/recipes/1").get_json()
+        tag_ids = [tag["id"] for tag in saved_recipe["tags"]]
+        self.assertNotIn(5, tag_ids)
+
+        with sqlite3.connect(self.database_path) as connection:
+            reusable_tag = connection.execute(
+                "SELECT name FROM tag WHERE id = ?",
+                (5,),
+            ).fetchone()
+
+        self.assertIsNotNone(reusable_tag)
+
+    def test_note_relationship_api_attaches_and_removes_a_reusable_note(self):
+        with sqlite3.connect(self.database_path) as connection:
+            connection.execute(
+                """
+                INSERT INTO note (id, title, note_type, body)
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    5,
+                    "Serving Tradition",
+                    "family",
+                    "Serve from one shared platter.",
+                ),
+            )
+
+        attach_response = self.client.post(
+            "/api/recipes/1/notes",
+            json={"note_id": 5},
+        )
+
+        self.assertEqual(attach_response.status_code, 201)
+        self.assertEqual(
+            attach_response.get_json(),
+            {
+                "id": 5,
+                "title": "Serving Tradition",
+                "note_type": "family",
+                "body": "Serve from one shared platter.",
+            },
+        )
+
+        remove_response = self.client.delete(
+            "/api/recipes/1/notes/5"
+        )
+        self.assertEqual(remove_response.status_code, 204)
+
+        saved_recipe = self.client.get("/api/recipes/1").get_json()
+        note_ids = [note["id"] for note in saved_recipe["notes"]]
+        self.assertNotIn(5, note_ids)
+
+        with sqlite3.connect(self.database_path) as connection:
+            reusable_note = connection.execute(
+                "SELECT title FROM note WHERE id = ?",
+                (5,),
+            ).fetchone()
+
+        self.assertIsNotNone(reusable_note)
 
     def test_delete_recipe_api_removes_the_recipe(self):
         response = self.client.delete("/api/recipes/1")

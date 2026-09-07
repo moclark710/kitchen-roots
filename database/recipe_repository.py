@@ -203,3 +203,162 @@ def delete_recipe(database_path, recipe_id):
         recipe_was_deleted = cursor.rowcount > 0
 
         return recipe_was_deleted
+
+
+def attach_recipe_ingredient(database_path, recipe_id, ingredient_data):
+    """Attach an existing ingredient to a recipe with its amount and unit."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        connection.execute(
+            """
+            INSERT INTO recipe_ingredient (
+                recipe_id,
+                ingredient_id,
+                amount,
+                unit
+            )
+            VALUES (?, ?, ?, ?)
+            """,
+            (
+                recipe_id,
+                ingredient_data["ingredient_id"],
+                ingredient_data["amount"],
+                ingredient_data["unit"],
+            ),
+        )
+
+        ingredient = connection.execute(
+            """
+            SELECT
+                ingredient.id,
+                ingredient.name,
+                recipe_ingredient.amount,
+                recipe_ingredient.unit
+            FROM recipe_ingredient
+            JOIN ingredient
+                ON ingredient.id = recipe_ingredient.ingredient_id
+            WHERE recipe_ingredient.recipe_id = ?
+              AND recipe_ingredient.ingredient_id = ?
+            """,
+            (
+                recipe_id,
+                ingredient_data["ingredient_id"],
+            ),
+        ).fetchone()
+
+    return dict(ingredient)
+
+
+def remove_recipe_ingredient(database_path, recipe_id, ingredient_id):
+    """Remove an ingredient from a recipe without deleting the ingredient."""
+    with sqlite3.connect(database_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        cursor = connection.execute(
+            """
+            DELETE FROM recipe_ingredient
+            WHERE recipe_id = ?
+                AND ingredient_id = ?
+            """,
+            (recipe_id, ingredient_id),
+        )
+
+        relationship_was_deleted = cursor.rowcount > 0
+
+    return relationship_was_deleted
+
+
+def attach_recipe_tag(database_path, recipe_id, tag_id):
+    """Attach an existing reusable tag to a recipe."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        connection.execute(
+            """
+            INSERT INTO recipe_tag (recipe_id, tag_id)
+            VALUES (?, ?)
+            """,
+            (recipe_id, tag_id),
+        )
+
+        tag = connection.execute(
+            """
+            SELECT tag.id, tag.name, tag.type
+            FROM recipe_tag
+            JOIN tag ON tag.id = recipe_tag.tag_id
+            WHERE recipe_tag.recipe_id = ?
+              AND recipe_tag.tag_id = ?
+            """,
+            (recipe_id, tag_id),
+        ).fetchone()
+
+    return dict(tag)
+
+
+def remove_recipe_tag(database_path, recipe_id, tag_id):
+    """Remove a tag from a recipe without deleting the reusable tag."""
+    with sqlite3.connect(database_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        cursor = connection.execute(
+            """
+            DELETE FROM recipe_tag
+            WHERE recipe_id = ?
+              AND tag_id = ?
+            """,
+            (recipe_id, tag_id),
+        )
+
+        relationship_was_deleted = cursor.rowcount > 0
+
+    return relationship_was_deleted
+
+
+def attach_recipe_note(database_path, recipe_id, note_id):
+    """Attach an existing reusable note to a recipe."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        connection.execute(
+            """
+            INSERT INTO recipe_note (recipe_id, note_id)
+            VALUES (?, ?)
+            """,
+            (recipe_id, note_id),
+        )
+
+        note = connection.execute(
+            """
+            SELECT note.id, note.title, note.note_type, note.body
+            FROM recipe_note
+            JOIN note ON note.id = recipe_note.note_id
+            WHERE recipe_note.recipe_id = ?
+              AND recipe_note.note_id = ?
+            """,
+            (recipe_id, note_id),
+        ).fetchone()
+
+    return dict(note)
+
+
+def remove_recipe_note(database_path, recipe_id, note_id):
+    """Remove a note from a recipe without deleting the reusable note."""
+    with sqlite3.connect(database_path) as connection:
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        cursor = connection.execute(
+            """
+            DELETE FROM recipe_note
+            WHERE recipe_id = ?
+              AND note_id = ?
+            """,
+            (recipe_id, note_id),
+        )
+
+        relationship_was_deleted = cursor.rowcount > 0
+
+    return relationship_was_deleted
