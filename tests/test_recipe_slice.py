@@ -112,6 +112,104 @@ class RecipeDetailSliceTests(unittest.TestCase):
         self.assertEqual(recipe["tier"], "free")
         self.assertEqual(recipe["user"]["id"], 1)
 
+    def test_create_recipe_rejects_a_blank_title(self):
+        response = self.client.post(
+            "/api/recipes",
+            json={
+                "title": "",
+                "description": "A recipe without a title.",
+                "prep_time": 10,
+                "cook_time": 20,
+                "user_id": 1,
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Title is required."},
+        )
+
+    def test_create_recipe_rejects_a_blank_description(self):
+        response = self.client.post(
+            "/api/recipes",
+            json={
+                "title": "Pepper Soup",
+                "description": "   ",
+                "prep_time": 10,
+                "cook_time": 20,
+                "user_id": 1,
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Description is required."},
+        )
+
+    def test_create_recipe_rejects_a_negative_prep_time(self):
+        response = self.client.post(
+            "/api/recipes",
+            json={
+                "title": "Pepper Soup",
+                "description": "A warming soup.",
+                "prep_time": -1,
+                "cook_time": 20,
+                "user_id": 1,
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Prep time must be zero or greater."},
+        )
+
+    def test_create_recipe_rejects_a_negative_cook_time(self):
+        response = self.client.post(
+            "/api/recipes",
+            json={
+                "title": "Pepper Soup",
+                "description": "A Warming Soup",
+                "prep_time": 10,
+                "cook_time": -1,
+                "user_id": 1,
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Cook time must be zero or greater."},
+        )
+
+    def test_create_recipe_requires_json_recipe_data(self):
+        response = self.client.post("/api/recipes")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Recipe data is required."},
+        )
+
+    def test_create_recipe_requires_a_user(self):
+        response = self.client.post(
+            "/api/recipes",
+            json={
+                "title": "Pepper Soup",
+                "description": "A warming soup.",
+                "prep_time": 10,
+                "cook_time": 20,
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "User is required."},
+        )
+
     def test_new_recipe_page_loads_the_form(self):
         response = self.client.get("/recipes/new")
 
@@ -150,6 +248,57 @@ class RecipeDetailSliceTests(unittest.TestCase):
         self.assertEqual(saved_recipe["prep_time"], 60)
         self.assertEqual(saved_recipe["cook_time"], 90)
 
+    def test_update_recipe_rejects_a_blank_title(self):
+        response = self.client.patch(
+            "/api/recipes/1",
+            json={"title": "   "},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Title is required."},
+        )
+
+        saved_recipe = self.client.get("/api/recipes/1").get_json()
+        self.assertEqual(saved_recipe["title"], "Liberian Jollof Rice")
+
+    def test_update_recipe_rejects_a_negative_cook_time(self):
+        response = self.client.patch(
+            "/api/recipes/1",
+            json={"cook_time": -1},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Cook time must be zero or greater."},
+        )
+
+        saved_recipe = self.client.get("/api/recipes/1").get_json()
+        self.assertEqual(saved_recipe["cook_time"], 80)
+
+    def test_update_missing_recipe_returns_json_404(self):
+        response = self.client.patch(
+            "/api/recipes/999",
+            json={"title": "Missing Recipe"},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Recipe not found."},
+        )
+
+    def test_update_recipe_requires_json_recipe_data(self):
+        response = self.client.patch("/api/recipes/1")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "Recipe data is required."},
+        )
+
     def test_edit_recipe_page_includes_requested_recipe_id(self):
         response = self.client.get("/recipes/1/edit")
 
@@ -177,6 +326,24 @@ class RecipeDetailSliceTests(unittest.TestCase):
             response.get_json(),
             {"error": "Recipe not found."},
         )
+
+    def test_database_failure_returns_json_500(self):
+        app = create_app(
+            {
+                "TESTING": True,
+                "DATABASE_PATH": Path(self.temp_directory.name),
+            }
+        )
+        client = app.test_client()
+
+        response = client.get("/api/recipes")
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(
+            response.get_json(),
+            {"error": "A database error occurred."},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
