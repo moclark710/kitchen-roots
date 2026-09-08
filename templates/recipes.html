@@ -8,10 +8,7 @@
   </head>
 
   <body>
-    <header class="site-header">
-      <a class="brand" href="/">Kitchen Roots</a>
-      <span>Family recipes. Living history.</span>
-    </header>
+    {% include "_site_header.html" %}
 
     <main class="recipe-shell">
       <header class="recipe-header">
@@ -24,12 +21,36 @@
         <a class="primary-link" href="/recipes/new">Add a Recipe</a>
       </header>
 
+      <form id="tag-filter-form" class="collection-filter">
+        <label for="recipe-search">Search recipes by title</label>
+        <input
+          id="recipe-search"
+          name="q"
+          type="search"
+          placeholder="Try Jollof Rice"
+        >
+
+        <label for="tag-filter">Filter recipes by tag</label>
+        <div class="collection-filter-controls">
+          <select id="tag-filter" name="tag_id">
+            <option value="">All tags</option>
+          </select>
+          <button type="submit">Filter Recipes</button>
+          <button type="button" class="filter-clear" data-clear-filter>
+            Clear Filter
+          </button>
+        </div>
+        <p id="filter-message" aria-live="polite"></p>
+      </form>
+
       <section>
         <div id="recipe-list" class="recipe-list" aria-live="polite">
           <p class="loading">Loading recipes...</p>
         </div>
       </section>
     </main>
+
+    {% include "_site_footer.html" %}
 
     <script src="{{ url_for('static', filename='recipes.js') }}"></script>
   </body>

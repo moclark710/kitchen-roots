@@ -7,10 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='recipe.css') }}">
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href="/">Kitchen Roots</a>
-      <span>Family recipes. Living history.</span>
-    </header>
+    {% include "_site_header.html" %}
 
     <main
       id="recipe"
@@ -20,6 +17,8 @@
     >
       <p class="loading">Loading recipe...</p>
     </main>
+
+    {% include "_site_footer.html" %}
 
     <template id="recipe-template">
       <article>

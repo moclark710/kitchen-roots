@@ -1,4 +1,9 @@
 const recipeList = document.querySelector("#recipe-list");
+const tagFilterForm = document.querySelector("#tag-filter-form");
+const tagFilterSelect = document.querySelector("#tag-filter");
+const recipeSearchInput = document.querySelector("#recipe-search");
+const clearFilterButton = document.querySelector("[data-clear-filter]");
+const filterMessage = document.querySelector("#filter-message");
 
 function createRecipeCard(recipe) {
   const card = document.createElement("article");
@@ -21,9 +26,48 @@ function createRecipeCard(recipe) {
   return card;
 }
 
-async function loadRecipes() {
+async function loadTagFilters() {
   try {
-    const response = await fetch("/api/recipes");
+    const response = await fetch("/api/tags");
+    const tags = await response.json();
+
+    if (!response.ok) {
+      throw new Error(tags.error || "Unable to load tag filters.");
+    }
+
+    tags.forEach((tag) => {
+      const option = document.createElement("option");
+      option.value = tag.id;
+      option.textContent = tag.name;
+      tagFilterSelect.append(option);
+    });
+  } catch (error) {
+    filterMessage.textContent = error.message;
+  }
+}
+
+async function loadRecipes(tagId = "", searchQuery = "") {
+  const loadingMessage = document.createElement("p");
+  loadingMessage.className = "loading";
+  loadingMessage.textContent = "Loading recipes...";
+  recipeList.className = "recipe-list";
+  recipeList.replaceChildren(loadingMessage);
+
+  try {
+    const query = new URLSearchParams();
+
+    if (tagId) {
+      query.set("tag_id", tagId);
+    }
+
+    if (searchQuery) {
+      query.set("q", searchQuery);
+    }
+
+    const queryString = query.toString();
+    const response = await fetch(
+      `/api/recipes${queryString ? `?${queryString}` : ""}`
+    );
     const recipes = await response.json();
 
     if (!response.ok) {
@@ -31,7 +75,9 @@ async function loadRecipes() {
     }
 
     if (recipes.length === 0) {
-      recipeList.textContent = "No recipes are available yet.";
+      recipeList.textContent = tagId || searchQuery
+        ? "No recipes match your search and filters."
+        : "No recipes are available yet.";
       return;
     }
 
@@ -43,4 +89,33 @@ async function loadRecipes() {
   }
 }
 
+tagFilterForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const selectedOption = tagFilterSelect.selectedOptions[0];
+  const searchQuery = recipeSearchInput.value.trim();
+  const activeFilters = [];
+
+  if (searchQuery) {
+    activeFilters.push(`with a title matching “${searchQuery}”`);
+  }
+
+  if (tagFilterSelect.value) {
+    activeFilters.push(`tagged ${selectedOption.textContent}`);
+  }
+
+  filterMessage.textContent = activeFilters.length
+    ? `Showing recipes ${activeFilters.join(" and ")}.`
+    : "Showing all recipes.";
+
+  loadRecipes(tagFilterSelect.value, searchQuery);
+});
+
+clearFilterButton.addEventListener("click", () => {
+  tagFilterSelect.value = "";
+  recipeSearchInput.value = "";
+  filterMessage.textContent = "Showing all recipes.";
+  loadRecipes();
+});
+
+loadTagFilters();
 loadRecipes();

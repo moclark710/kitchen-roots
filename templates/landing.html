@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kitchen Roots | Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='recipe.css') }}">
+  </head>
+
+  <body>
+    {% include "_site_header.html" %}
+
+    <main class="landing-shell">
+      <section class="landing-hero">
+        <p class="eyebrow">Preserve what matters</p>
+
+        <h1>Family recipes carry more than ingredients.</h1>
+
+        <p class="description">
+          Keep recipes, cooking knowledge, family stories, and cultural roots
+          together in one living collection.
+        </p>
+
+        <div class="landing-actions">
+          <a class="primary-link" href="/recipes">Browse Recipes</a>
+          <a class="secondary-link" href="/recipes/new">Add a Recipe</a>
+        </div>
+      </section>
+    </main>
+
+    {% include "_site_footer.html" %}
+  </body>
+</html>

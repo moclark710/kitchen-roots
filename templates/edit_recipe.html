@@ -11,15 +11,13 @@
   </head>
 
   <body>
-    <header class="site-header">
-      <a class="brand" href="/recipes">Kitchen Roots</a>
-      <span>Preserve a recipe from your kitchen.</span>
-    </header>
+    {% include "_site_header.html" %}
 
     <main class="recipe-shell form-page">
       <header class="recipe-header">
         <p class="eyebrow">Update your recipe</p>
         <h1>Edit Recipe</h1>
+        <p class="description">Preserve a recipe from your kitchen.</p>
       </header>
 
       <form
@@ -54,13 +52,169 @@
           min="0"
           required
         >
-
         <button type="submit">Update Recipe</button>
         <p id="form-message" aria-live="polite">
           Loading recipe...
         </p>
       </form>
+
+      <section class="relationship-editor">
+        <p class="section-label">What you'll need</p>
+        <h2>Ingredients</h2>
+        <div class="ingredient-editor-grid">
+          <ul class="ingredient-list" data-ingredient-list>
+            <li>Loading ingredients...</li>
+          </ul>
+
+          <form id="ingredient-form" class="recipe-form">
+            <label for="ingredient-id">Choose an existing ingredient</label>
+            <select id="ingredient-id" name="ingredient_id">
+              <option value="">Choose an ingredient</option>
+            </select>
+
+            <label for="ingredient-name">Or create a new ingredient</label>
+            <input
+              id="ingredient-name"
+              name="ingredient_name"
+              type="text"
+            >
+
+            <label for="ingredient-amount">Amount</label>
+            <input
+              id="ingredient-amount"
+              name="amount"
+              type="text"
+              required
+            >
+
+            <label for="ingredient-unit">Unit</label>
+            <input
+              id="ingredient-unit"
+              name="unit"
+              type="text"
+              required
+            >
+
+            <button type="submit">Save Ingredient</button>
+            <p id="ingredient-message" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="relationship-editor">
+        <p class="section-label">Make it</p>
+        <h2>Recipe Steps</h2>
+
+        <ol class="step-editor-list" data-step-editor-list>
+          <li>Loading recipe steps...</li>
+        </ol>
+
+        <div class="step-editor-actions">
+          <button type="button" data-add-step>Add Step</button>
+          <button type="button" data-save-steps>Save Steps</button>
+        </div>
+
+        <p id="step-message" aria-live="polite"></p>
+      </section>
+
+      <section class="relationship-editor">
+        <p class="section-label">Organize it</p>
+        <h2>Recipe Tags</h2>
+
+        <div class="tag-editor-grid">
+          <ul class="tag-editor-list" data-tag-editor-list>
+            <li>Loading recipe tags...</li>
+          </ul>
+
+          <form id="tag-form" class="recipe-form">
+            <label for="tag-id">Choose an existing tag</label>
+            <select id="tag-id" name="tag_id">
+              <option value="">Choose a tag</option>
+            </select>
+
+            <label for="tag-name">Or create a new tag</label>
+            <input id="tag-name" name="tag_name" type="text">
+
+            <label for="tag-type">Tag type</label>
+            <input
+              id="tag-type"
+              name="tag_type"
+              type="text"
+              list="tag-type-options"
+            >
+            <datalist id="tag-type-options">
+              <option value="region"></option>
+              <option value="style"></option>
+              <option value="dish"></option>
+              <option value="collection"></option>
+            </datalist>
+
+            <button type="submit">Save Tag</button>
+            <p id="tag-message" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="relationship-editor">
+        <p class="section-label">Preserve the story</p>
+        <h2>Recipe Notes</h2>
+
+        <div class="note-editor-grid">
+          <ul class="note-editor-list" data-note-editor-list>
+            <li>Loading recipe notes...</li>
+          </ul>
+
+          <form id="note-form" class="recipe-form">
+            <label for="note-id">Choose an existing note</label>
+            <select id="note-id" name="note_id">
+              <option value="">Choose a note</option>
+            </select>
+            <article id="note-preview" class="note-selection-preview" hidden>
+              <p class="note-type" data-note-preview-type></p>
+              <h3 data-note-preview-title></h3>
+              <p data-note-preview-body></p>
+            </article>
+
+            <label for="note-title">Or create a new note</label>
+            <input id="note-title" name="note_title" type="text">
+
+            <label for="note-type">Note type</label>
+            <select
+              id="note-type"
+              name="note_type"
+              aria-describedby="note-type-help"
+            >
+              <option value="">Choose a note type</option>
+              <option value="family">Family story</option>
+              <option value="region">Regional context</option>
+              <option value="heritage">Heritage</option>
+              <option value="technical">Cooking technique</option>
+            </select>
+            <p id="note-type-help" class="field-help">
+              Choose what kind of knowledge or story this note preserves.
+            </p>
+
+            <label for="note-body">Note</label>
+            <textarea id="note-body" name="note_body"></textarea>
+
+            <button type="submit">Save Note</button>
+            <p id="note-message" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
+      <nav class="editor-completion" aria-label="Finish editing recipe">
+        <a class="primary-link" href="/recipes/{{ recipe_id }}">
+          View Recipe
+        </a>
+        <a class="secondary-link" href="/recipes">
+          Back to Recipe Collection
+        </a>
+      </nav>
+
     </main>
+
+    {% include "_site_footer.html" %}
 
     <script src="{{ url_for('static', filename='edit_recipe.js') }}"></script>
   </body>

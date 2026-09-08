@@ -1,8 +1,8 @@
 import sqlite3
 
 
-def list_recipes(database_path):
-    """Return summary info for every recipe."""
+def list_recipes(database_path, tag_id=None, search=None):
+    """Return recipe summaries, optionally filtered by tag and title."""
     with sqlite3.connect(database_path) as connection:
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
@@ -20,8 +20,24 @@ def list_recipes(database_path):
                 user.name AS user_name
             FROM recipe
             JOIN user ON user.id = recipe.user_id
+            WHERE (
+                ? IS NULL
+                OR EXISTS (
+                    SELECT 1
+                    FROM recipe_tag
+                    WHERE recipe_tag.recipe_id = recipe.id
+                      AND recipe_tag.tag_id = ?
+                )
+            )
+              AND (? IS NULL OR recipe.title LIKE ?)
             ORDER BY recipe.title
-            """
+            """,
+            (
+                tag_id,
+                tag_id,
+                search,
+                f"%{search}%" if search else None,
+            ),
         ).fetchall()
 
     return [
@@ -39,6 +55,118 @@ def list_recipes(database_path):
         }
         for recipe in recipes
     ]
+
+
+def list_ingredients(database_path):
+    """Return every reusable ingredient in alphabetical order."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+
+        ingredients = connection.execute(
+            """
+            SELECT id, name
+            FROM ingredient
+            ORDER BY name
+            """
+        ).fetchall()
+
+    return [dict(ingredient) for ingredient in ingredients]
+
+
+def create_ingredient(database_path, ingredient_data):
+    """Create and return a reusable ingredient."""
+    with sqlite3.connect(database_path) as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO ingredient (name)
+            VALUES (?)
+            """,
+            (ingredient_data["name"],),
+        )
+
+        ingredient = {
+            "id": cursor.lastrowid,
+            "name": ingredient_data["name"],
+        }
+
+    return ingredient
+
+
+def list_tags(database_path):
+    """Return every reusable tag in alphabetical order."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+
+        tags = connection.execute(
+            """
+            SELECT id, name, type
+            FROM tag
+            ORDER BY name
+            """
+        ).fetchall()
+
+    return [dict(tag) for tag in tags]
+
+
+def create_tag(database_path, tag_data):
+    """Create and return a reusable tag."""
+    with sqlite3.connect(database_path) as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO tag (name, type)
+            VALUES (?, ?)
+            """,
+            (tag_data["name"], tag_data["type"]),
+        )
+
+        tag = {
+            "id": cursor.lastrowid,
+            "name": tag_data["name"],
+            "type": tag_data["type"],
+        }
+
+    return tag
+
+
+def list_notes(database_path):
+    """Return every reusable note in alphabetical order."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+
+        notes = connection.execute(
+            """
+            SELECT id, title, note_type, body
+            FROM note
+            ORDER BY title
+            """
+        ).fetchall()
+
+    return [dict(note) for note in notes]
+
+
+def create_note(database_path, note_data):
+    """Create and return a reusable note without altering its body text."""
+    with sqlite3.connect(database_path) as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO note (title, note_type, body)
+            VALUES (?, ?, ?)
+            """,
+            (
+                note_data["title"],
+                note_data["note_type"],
+                note_data["body"],
+            ),
+        )
+
+        note = {
+            "id": cursor.lastrowid,
+            "title": note_data["title"],
+            "note_type": note_data["note_type"],
+            "body": note_data["body"],
+        }
+
+    return note
 
 
 def get_recipe(database_path, recipe_id):
@@ -251,6 +379,54 @@ def attach_recipe_ingredient(database_path, recipe_id, ingredient_data):
     return dict(ingredient)
 
 
+def update_recipe_ingredient(
+    database_path,
+    recipe_id,
+    ingredient_id,
+    ingredient_data,
+):
+    """Update and return a recipe ingredient relationship."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        cursor = connection.execute(
+            """
+            UPDATE recipe_ingredient
+            SET amount = ?, unit = ?
+            WHERE recipe_id = ?
+              AND ingredient_id = ?
+            """,
+            (
+                ingredient_data["amount"],
+                ingredient_data["unit"],
+                recipe_id,
+                ingredient_id,
+            ),
+        )
+
+        if cursor.rowcount == 0:
+            return None
+
+        ingredient = connection.execute(
+            """
+            SELECT
+                ingredient.id,
+                ingredient.name,
+                recipe_ingredient.amount,
+                recipe_ingredient.unit
+            FROM recipe_ingredient
+            JOIN ingredient
+                ON ingredient.id = recipe_ingredient.ingredient_id
+            WHERE recipe_ingredient.recipe_id = ?
+              AND recipe_ingredient.ingredient_id = ?
+            """,
+            (recipe_id, ingredient_id),
+        ).fetchone()
+
+    return dict(ingredient)
+
+
 def remove_recipe_ingredient(database_path, recipe_id, ingredient_id):
     """Remove an ingredient from a recipe without deleting the ingredient."""
     with sqlite3.connect(database_path) as connection:
@@ -268,6 +444,56 @@ def remove_recipe_ingredient(database_path, recipe_id, ingredient_id):
         relationship_was_deleted = cursor.rowcount > 0
 
     return relationship_was_deleted
+
+
+def replace_recipe_steps(database_path, recipe_id, instructions):
+    """Replace and return all ordered steps for one recipe."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        recipe_exists = connection.execute(
+            "SELECT 1 FROM recipe WHERE id = ?",
+            (recipe_id,),
+        ).fetchone()
+
+        if recipe_exists is None:
+            return None
+
+        connection.execute(
+            "DELETE FROM recipe_step WHERE recipe_id = ?",
+            (recipe_id,),
+        )
+
+        connection.executemany(
+            """
+            INSERT INTO recipe_step (
+                recipe_id,
+                step_number,
+                instruction
+            )
+            VALUES (?, ?, ?)
+            """,
+            [
+                (recipe_id, step_number, instruction)
+                for step_number, instruction in enumerate(
+                    instructions,
+                    start=1,
+                )
+            ],
+        )
+
+        steps = connection.execute(
+            """
+            SELECT id, step_number, instruction
+            FROM recipe_step
+            WHERE recipe_id = ?
+            ORDER BY step_number
+            """,
+            (recipe_id,),
+        ).fetchall()
+
+    return [dict(step) for step in steps]
 
 
 def attach_recipe_tag(database_path, recipe_id, tag_id):
