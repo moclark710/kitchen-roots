@@ -230,6 +230,71 @@ h3 {
   line-height: 1.6;
 }
 
+.collection-filter {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  border: 1px solid #cdbfa7;
+  border-radius: 1rem;
+  background: rgba(255, 252, 244, 0.72);
+}
+
+.collection-filter label {
+  color: #173e2c;
+  font: 700 0.85rem Arial, sans-serif;
+}
+
+.collection-filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.collection-filter select {
+  min-width: min(100%, 18rem);
+  padding: 0.8rem 1rem;
+  border: 1px solid #9c8061;
+  border-radius: 0.5rem;
+  background: #fffdf7;
+  color: #252219;
+  font: inherit;
+}
+
+.collection-filter button {
+  padding: 0.8rem 1.2rem;
+  border: 1px solid #173e2c;
+  border-radius: 999px;
+  background: #173e2c;
+  color: #fffdf7;
+  font: 700 0.85rem Arial, sans-serif;
+  cursor: pointer;
+}
+
+.collection-filter .filter-clear {
+  background: transparent;
+  color: #173e2c;
+}
+
+.collection-filter button:hover {
+  border-color: #a24725;
+  background: #a24725;
+  color: #fffdf7;
+}
+
+.collection-filter select:focus-visible,
+.collection-filter button:focus-visible {
+  outline: 3px solid #cb6f39;
+  outline-offset: 3px;
+}
+
+#filter-message {
+  min-height: 1.2rem;
+  margin: 0;
+  color: #665d4c;
+  font: 700 0.8rem/1.4 Arial, sans-serif;
+}
+
 .primary-link,
 .recipe-form button {
   display: inline-block;
@@ -315,6 +380,66 @@ h3 {
   grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.9fr);
   gap: 2rem;
   align-items: start;
+}
+
+.tag-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.9fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.tag-editor-grid .recipe-form {
+  max-width: none;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.tag-editor-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-editor-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid #ded3c0;
+}
+
+.tag-editor-type {
+  color: #665d4c;
+  font: 700 0.75rem Arial, sans-serif;
+  text-transform: capitalize;
+}
+
+.tag-editor-list button {
+  margin-left: auto;
+  padding: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: #8b2d20;
+  font: 700 0.8rem Arial, sans-serif;
+  cursor: pointer;
+}
+
+.tag-editor-list button:hover {
+  text-decoration: underline;
+}
+
+.tag-editor-list button:focus-visible {
+  outline: 3px solid #cb6f39;
+  outline-offset: 2px;
+}
+
+#tag-message {
+  min-height: 1.2rem;
+  margin: 0;
+  color: #665d4c;
+  font: 700 0.8rem/1.4 Arial, sans-serif;
 }
 
 .ingredient-editor-grid .recipe-form {
@@ -542,7 +667,8 @@ h3 {
     padding: 3rem 0;
   }
 
-  .ingredient-editor-grid {
+  .ingredient-editor-grid,
+  .tag-editor-grid {
     grid-template-columns: 1fr;
   }
 

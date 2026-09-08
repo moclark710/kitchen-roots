@@ -1,8 +1,8 @@
 import sqlite3
 
 
-def list_recipes(database_path):
-    """Return summary info for every recipe."""
+def list_recipes(database_path, tag_id=None):
+    """Return recipe summaries, optionally limited to one reusable tag."""
     with sqlite3.connect(database_path) as connection:
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
@@ -20,8 +20,16 @@ def list_recipes(database_path):
                 user.name AS user_name
             FROM recipe
             JOIN user ON user.id = recipe.user_id
+            WHERE ? IS NULL
+               OR EXISTS (
+                    SELECT 1
+                    FROM recipe_tag
+                    WHERE recipe_tag.recipe_id = recipe.id
+                      AND recipe_tag.tag_id = ?
+               )
             ORDER BY recipe.title
-            """
+            """,
+            (tag_id, tag_id),
         ).fetchall()
 
     return [
@@ -74,6 +82,42 @@ def create_ingredient(database_path, ingredient_data):
         }
 
     return ingredient
+
+
+def list_tags(database_path):
+    """Return every reusable tag in alphabetical order."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+
+        tags = connection.execute(
+            """
+            SELECT id, name, type
+            FROM tag
+            ORDER BY name
+            """
+        ).fetchall()
+
+    return [dict(tag) for tag in tags]
+
+
+def create_tag(database_path, tag_data):
+    """Create and return a reusable tag."""
+    with sqlite3.connect(database_path) as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO tag (name, type)
+            VALUES (?, ?)
+            """,
+            (tag_data["name"], tag_data["type"]),
+        )
+
+        tag = {
+            "id": cursor.lastrowid,
+            "name": tag_data["name"],
+            "type": tag_data["type"],
+        }
+
+    return tag
 
 
 def get_recipe(database_path, recipe_id):
@@ -352,6 +396,7 @@ def remove_recipe_ingredient(database_path, recipe_id, ingredient_id):
 
     return relationship_was_deleted
 
+
 def replace_recipe_steps(database_path, recipe_id, instructions):
     """Replace and return all ordered steps for one recipe."""
     with sqlite3.connect(database_path) as connection:
@@ -400,6 +445,7 @@ def replace_recipe_steps(database_path, recipe_id, instructions):
         ).fetchall()
 
     return [dict(step) for step in steps]
+
 
 def attach_recipe_tag(database_path, recipe_id, tag_id):
     """Attach an existing reusable tag to a recipe."""

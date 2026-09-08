@@ -17,9 +17,16 @@ const stepEditorList = document.querySelector("[data-step-editor-list]");
 const addStepButton = document.querySelector("[data-add-step]");
 const saveStepsButton = document.querySelector("[data-save-steps]");
 const stepMessage = document.querySelector("#step-message");
+const tagEditorList = document.querySelector("[data-tag-editor-list]");
+const tagForm = document.querySelector("#tag-form");
+const tagSelect = document.querySelector("#tag-id");
+const tagNameInput = document.querySelector("#tag-name");
+const tagTypeInput = document.querySelector("#tag-type");
+const tagMessage = document.querySelector("#tag-message");
 
 let currentIngredients = [];
 let currentSteps = [];
+let currentTags = [];
 
 async function removeIngredient(ingredientId) {
   const confirmed = window.confirm(
@@ -224,6 +231,80 @@ function renderStepEditor(steps) {
   });
 }
 
+async function removeTag(tagId) {
+  tagMessage.textContent = "Removing tag...";
+
+  try {
+    const response = await fetch(
+      `/api/recipes/${recipeId}/tags/${tagId}`,
+      { method: "DELETE" }
+    );
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || "Unable to remove the tag.");
+    }
+
+    await loadRecipeForEditing();
+    tagMessage.textContent = "Tag removed.";
+  } catch (error) {
+    tagMessage.textContent = error.message;
+  }
+}
+
+function renderTags(tags) {
+  currentTags = tags;
+  tagEditorList.replaceChildren();
+
+  if (tags.length === 0) {
+    const emptyMessage = document.createElement("li");
+    emptyMessage.textContent = "No tags added yet.";
+    tagEditorList.append(emptyMessage);
+    return;
+  }
+
+  tags.forEach((tag) => {
+    const item = document.createElement("li");
+    const label = document.createElement("span");
+    label.className = "tag";
+    label.textContent = tag.name;
+
+    const type = document.createElement("span");
+    type.className = "tag-editor-type";
+    type.textContent = tag.type;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () => removeTag(tag.id));
+
+    item.append(label, type, removeButton);
+    tagEditorList.append(item);
+  });
+}
+
+async function loadTagOptions() {
+  try {
+    const response = await fetch("/api/tags");
+    const tags = await response.json();
+
+    if (!response.ok) {
+      throw new Error(tags.error || "Unable to load tag choices.");
+    }
+
+    tagSelect.length = 1;
+
+    tags.forEach((tag) => {
+      const option = document.createElement("option");
+      option.value = tag.id;
+      option.textContent = `${tag.name} (${tag.type})`;
+      tagSelect.append(option);
+    });
+  } catch (error) {
+    tagMessage.textContent = error.message;
+  }
+}
+
 async function loadRecipeForEditing() {
   try {
     const response = await fetch(`/api/recipes/${recipeId}`);
@@ -239,6 +320,7 @@ async function loadRecipeForEditing() {
     cookTimeInput.value = recipe.cook_time;
     renderIngredients(recipe.ingredients);
     renderStepEditor(recipe.steps);
+    renderTags(recipe.tags);
     formMessage.textContent = "";
   } catch (error) {
     formMessage.textContent = error.message;
@@ -409,5 +491,85 @@ saveStepsButton.addEventListener("click", async () => {
     stepMessage.textContent = error.message;
   }
 });
+
+tagSelect.addEventListener("change", () => {
+  if (tagSelect.value) {
+    tagNameInput.value = "";
+    tagTypeInput.value = "";
+  }
+});
+
+tagNameInput.addEventListener("input", () => {
+  if (tagNameInput.value.trim()) {
+    tagSelect.value = "";
+  }
+});
+
+tagForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  let tagId = Number(tagSelect.value);
+  const newTagName = tagNameInput.value.trim();
+  const newTagType = tagTypeInput.value.trim();
+
+  if (!tagId && !newTagName) {
+    tagMessage.textContent = "Choose a tag or enter a new tag.";
+    return;
+  }
+
+  if (newTagName && !newTagType) {
+    tagMessage.textContent = "Enter a type for the new tag.";
+    return;
+  }
+
+  if (currentTags.some((tag) => tag.id === tagId)) {
+    tagMessage.textContent = "That tag is already on this recipe.";
+    return;
+  }
+
+  tagMessage.textContent = "Saving tag...";
+
+  try {
+    if (newTagName) {
+      const createResponse = await fetch("/api/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newTagName,
+          type: newTagType,
+        }),
+      });
+
+      const createdTag = await createResponse.json();
+
+      if (!createResponse.ok) {
+        throw new Error(createdTag.error || "Unable to create the tag.");
+      }
+
+      tagId = createdTag.id;
+    }
+
+    const attachResponse = await fetch(`/api/recipes/${recipeId}/tags`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tag_id: tagId }),
+    });
+
+    const attachedTag = await attachResponse.json();
+
+    if (!attachResponse.ok) {
+      throw new Error(attachedTag.error || "Unable to attach the tag.");
+    }
+
+    tagForm.reset();
+    await loadRecipeForEditing();
+    await loadTagOptions();
+    tagMessage.textContent = "Tag saved.";
+  } catch (error) {
+    tagMessage.textContent = error.message;
+  }
+});
+
 loadRecipeForEditing();
 loadIngredientOptions();
+loadTagOptions();

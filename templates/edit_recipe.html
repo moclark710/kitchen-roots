@@ -117,6 +117,44 @@
         <p id="step-message" aria-live="polite"></p>
       </section>
 
+      <section class="relationship-editor">
+        <p class="section-label">Organize it</p>
+        <h2>Recipe Tags</h2>
+
+        <div class="tag-editor-grid">
+          <ul class="tag-editor-list" data-tag-editor-list>
+            <li>Loading recipe tags...</li>
+          </ul>
+
+          <form id="tag-form" class="recipe-form">
+            <label for="tag-id">Choose an existing tag</label>
+            <select id="tag-id" name="tag_id">
+              <option value="">Choose a tag</option>
+            </select>
+
+            <label for="tag-name">Or create a new tag</label>
+            <input id="tag-name" name="tag_name" type="text">
+
+            <label for="tag-type">Tag type</label>
+            <input
+              id="tag-type"
+              name="tag_type"
+              type="text"
+              list="tag-type-options"
+            >
+            <datalist id="tag-type-options">
+              <option value="region"></option>
+              <option value="style"></option>
+              <option value="dish"></option>
+              <option value="collection"></option>
+            </datalist>
+
+            <button type="submit">Save Tag</button>
+            <p id="tag-message" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
     </main>
 
     <script src="{{ url_for('static', filename='edit_recipe.js') }}"></script>

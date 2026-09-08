@@ -1,4 +1,8 @@
 const recipeList = document.querySelector("#recipe-list");
+const tagFilterForm = document.querySelector("#tag-filter-form");
+const tagFilterSelect = document.querySelector("#tag-filter");
+const clearFilterButton = document.querySelector("[data-clear-filter]");
+const filterMessage = document.querySelector("#filter-message");
 
 function createRecipeCard(recipe) {
   const card = document.createElement("article");
@@ -21,9 +25,32 @@ function createRecipeCard(recipe) {
   return card;
 }
 
-async function loadRecipes() {
+async function loadTagFilters() {
   try {
-    const response = await fetch("/api/recipes");
+    const response = await fetch("/api/tags");
+    const tags = await response.json();
+
+    if (!response.ok) {
+      throw new Error(tags.error || "Unable to load tag filters.");
+    }
+
+    tags.forEach((tag) => {
+      const option = document.createElement("option");
+      option.value = tag.id;
+      option.textContent = tag.name;
+      tagFilterSelect.append(option);
+    });
+  } catch (error) {
+    filterMessage.textContent = error.message;
+  }
+}
+
+async function loadRecipes(tagId = "") {
+  recipeList.innerHTML = '<p class="loading">Loading recipes...</p>';
+
+  try {
+    const query = tagId ? `?tag_id=${encodeURIComponent(tagId)}` : "";
+    const response = await fetch(`/api/recipes${query}`);
     const recipes = await response.json();
 
     if (!response.ok) {
@@ -31,7 +58,9 @@ async function loadRecipes() {
     }
 
     if (recipes.length === 0) {
-      recipeList.textContent = "No recipes are available yet.";
+      recipeList.textContent = tagId
+        ? "No recipes match this tag."
+        : "No recipes are available yet.";
       return;
     }
 
@@ -43,4 +72,22 @@ async function loadRecipes() {
   }
 }
 
+tagFilterForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const selectedOption = tagFilterSelect.selectedOptions[0];
+
+  filterMessage.textContent = tagFilterSelect.value
+    ? `Showing recipes tagged ${selectedOption.textContent}.`
+    : "Showing all recipes.";
+
+  loadRecipes(tagFilterSelect.value);
+});
+
+clearFilterButton.addEventListener("click", () => {
+  tagFilterSelect.value = "";
+  filterMessage.textContent = "Showing all recipes.";
+  loadRecipes();
+});
+
+loadTagFilters();
 loadRecipes();

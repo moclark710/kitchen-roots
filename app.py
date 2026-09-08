@@ -5,6 +5,7 @@ from database.recipe_repository import (
     attach_recipe_ingredient,
     attach_recipe_note,
     attach_recipe_tag,
+    create_tag,
     create_recipe,
     delete_recipe,
     get_recipe,
@@ -12,6 +13,7 @@ from database.recipe_repository import (
     replace_recipe_steps,
     create_ingredient,
     list_ingredients,
+    list_tags,
     update_recipe_ingredient,
     remove_recipe_ingredient,
     remove_recipe_note,
@@ -95,7 +97,22 @@ def create_app(test_config=None):
 
     @app.get("/api/recipes")
     def recipe_list():
-        recipes = list_recipes(app.config["DATABASE_PATH"])
+        tag_value = request.args.get("tag_id")
+        tag_id = None
+
+        if tag_value:
+            try:
+                tag_id = int(tag_value)
+            except ValueError:
+                return jsonify(error="Tag filter must be a positive integer."), 400
+
+            if tag_id <= 0:
+                return jsonify(error="Tag filter must be a positive integer."), 400
+
+        recipes = list_recipes(
+            app.config["DATABASE_PATH"],
+            tag_id=tag_id,
+        )
         return jsonify(recipes)
 
     @app.post("/api/recipes")
@@ -136,6 +153,36 @@ def create_app(test_config=None):
             ingredient_data,
         )
         return jsonify(ingredient), 201
+
+    @app.get("/api/tags")
+    def tag_list():
+        tags = list_tags(app.config["DATABASE_PATH"])
+        return jsonify(tags)
+
+    @app.post("/api/tags")
+    def tag_create():
+        tag_data = request.get_json(silent=True)
+
+        if not isinstance(tag_data, dict):
+            return jsonify(error="Tag data is required."), 400
+
+        name = tag_data.get("name")
+        tag_type = tag_data.get("type")
+
+        if not isinstance(name, str) or not name.strip():
+            return jsonify(error="Tag name is required."), 400
+
+        if not isinstance(tag_type, str) or not tag_type.strip():
+            return jsonify(error="Tag type is required."), 400
+
+        tag = create_tag(
+            app.config["DATABASE_PATH"],
+            {
+                "name": name.strip(),
+                "type": tag_type.strip(),
+            },
+        )
+        return jsonify(tag), 201
 
     @app.post("/api/recipes/<int:recipe_id>/ingredients")
     def recipe_ingredient_create(recipe_id):
