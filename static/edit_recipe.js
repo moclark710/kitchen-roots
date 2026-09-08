@@ -13,7 +13,13 @@ const ingredientNameInput = document.querySelector("#ingredient-name");
 const ingredientAmountInput = document.querySelector("#ingredient-amount");
 const ingredientUnitInput = document.querySelector("#ingredient-unit");
 const ingredientMessage = document.querySelector("#ingredient-message");
+const stepEditorList = document.querySelector("[data-step-editor-list]");
+const addStepButton = document.querySelector("[data-add-step]");
+const saveStepsButton = document.querySelector("[data-save-steps]");
+const stepMessage = document.querySelector("#step-message");
+
 let currentIngredients = [];
+let currentSteps = [];
 
 async function removeIngredient(ingredientId) {
   const confirmed = window.confirm(
@@ -129,6 +135,95 @@ ingredientNameInput.addEventListener("input", () => {
   }
 });
 
+function renderStepEditor(steps) {
+  currentSteps = steps.map((step) => ({ ...step }));
+  stepEditorList.replaceChildren();
+
+  if (currentSteps.length === 0) {
+    const emptyMessage = document.createElement("li");
+    emptyMessage.textContent = "No recipe steps added yet.";
+    stepEditorList.append(emptyMessage);
+    return;
+  }
+
+  currentSteps.forEach((step, index) => {
+    const item = document.createElement("li");
+
+    const stepNumber = document.createElement("span");
+    stepNumber.className = "step-editor-number";
+    stepNumber.textContent = `Step ${index + 1}`;
+
+    const instructionInput = document.createElement("textarea");
+    instructionInput.value = step.instruction;
+    instructionInput.setAttribute(
+      "aria-label",
+      `Instruction for step ${index + 1}`
+    );
+
+    instructionInput.addEventListener("input", () => {
+      currentSteps[index].instruction = instructionInput.value;
+      stepMessage.textContent = "Unsaved step changes.";
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "step-row-actions";
+
+    const moveUpButton = document.createElement("button");
+    moveUpButton.type = "button";
+    moveUpButton.textContent = "Move up";
+    moveUpButton.disabled = index === 0;
+
+    moveUpButton.addEventListener("click", () => {
+      [currentSteps[index - 1], currentSteps[index]] = [
+        currentSteps[index],
+        currentSteps[index - 1],
+      ];
+
+      renderStepEditor(currentSteps);
+      stepMessage.textContent = "Unsaved step order.";
+    });
+
+    const moveDownButton = document.createElement("button");
+    moveDownButton.type = "button";
+    moveDownButton.textContent = "Move down";
+    moveDownButton.disabled = index === currentSteps.length - 1;
+
+    moveDownButton.addEventListener("click", () => {
+      [currentSteps[index], currentSteps[index + 1]] = [
+        currentSteps[index + 1],
+        currentSteps[index],
+      ];
+
+      renderStepEditor(currentSteps);
+      stepMessage.textContent = "Unsaved step order.";
+    });
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.textContent = "Remove";
+
+    removeButton.addEventListener("click", () => {
+      currentSteps.splice(index, 1);
+      renderStepEditor(currentSteps);
+      stepMessage.textContent = "Unsaved step removed.";
+    });
+
+    actions.append(
+      moveUpButton,
+      moveDownButton,
+      removeButton
+    );
+
+    item.append(
+      stepNumber,
+      instructionInput,
+      actions
+    );
+
+    stepEditorList.append(item);
+  });
+}
+
 async function loadRecipeForEditing() {
   try {
     const response = await fetch(`/api/recipes/${recipeId}`);
@@ -143,6 +238,7 @@ async function loadRecipeForEditing() {
     prepTimeInput.value = recipe.prep_time;
     cookTimeInput.value = recipe.cook_time;
     renderIngredients(recipe.ingredients);
+    renderStepEditor(recipe.steps);
     formMessage.textContent = "";
   } catch (error) {
     formMessage.textContent = error.message;
@@ -264,5 +360,54 @@ ingredientForm.addEventListener("submit", async (event) => {
   }
 });
 
+addStepButton.addEventListener("click", () => {
+  currentSteps.push({
+    instruction: "",
+  });
+
+  renderStepEditor(currentSteps);
+
+  const instructionInputs = stepEditorList.querySelectorAll("textarea");
+  const lastInput = instructionInputs[instructionInputs.length - 1];
+
+  lastInput.focus();
+  stepMessage.textContent = "Unsaved step added.";
+});
+
+saveStepsButton.addEventListener("click", async () => {
+  const instructions = currentSteps.map((step) =>
+    step.instruction.trim()
+  );
+
+  if (instructions.some((instruction) => !instruction)) {
+    stepMessage.textContent = "Every step needs an instruction.";
+    return;
+  }
+
+  stepMessage.textContent = "Saving recipe steps...";
+
+  try {
+    const response = await fetch(`/api/recipes/${recipeId}/steps`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        steps: instructions,
+      }),
+    });
+
+    const savedSteps = await response.json();
+
+    if (!response.ok) {
+      throw new Error(savedSteps.error || "Unable to save recipe steps.");
+    }
+
+    renderStepEditor(savedSteps);
+    stepMessage.textContent = "Recipe steps saved.";
+  } catch (error) {
+    stepMessage.textContent = error.message;
+  }
+});
 loadRecipeForEditing();
 loadIngredientOptions();

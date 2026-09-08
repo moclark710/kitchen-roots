@@ -352,6 +352,54 @@ def remove_recipe_ingredient(database_path, recipe_id, ingredient_id):
 
     return relationship_was_deleted
 
+def replace_recipe_steps(database_path, recipe_id, instructions):
+    """Replace and return all ordered steps for one recipe."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        recipe_exists = connection.execute(
+            "SELECT 1 FROM recipe WHERE id = ?",
+            (recipe_id,),
+        ).fetchone()
+
+        if recipe_exists is None:
+            return None
+
+        connection.execute(
+            "DELETE FROM recipe_step WHERE recipe_id = ?",
+            (recipe_id,),
+        )
+
+        connection.executemany(
+            """
+            INSERT INTO recipe_step (
+                recipe_id,
+                step_number,
+                instruction
+            )
+            VALUES (?, ?, ?)
+            """,
+            [
+                (recipe_id, step_number, instruction)
+                for step_number, instruction in enumerate(
+                    instructions,
+                    start=1,
+                )
+            ],
+        )
+
+        steps = connection.execute(
+            """
+            SELECT id, step_number, instruction
+            FROM recipe_step
+            WHERE recipe_id = ?
+            ORDER BY step_number
+            """,
+            (recipe_id,),
+        ).fetchall()
+
+    return [dict(step) for step in steps]
 
 def attach_recipe_tag(database_path, recipe_id, tag_id):
     """Attach an existing reusable tag to a recipe."""

@@ -100,6 +100,23 @@
           </form>
         </div>
       </section>
+
+      <section class="relationship-editor">
+        <p class="section-label">Make it</p>
+        <h2>Recipe Steps</h2>
+
+        <ol class="step-editor-list" data-step-editor-list>
+          <li>Loading recipe steps...</li>
+        </ol>
+
+        <div class="step-editor-actions">
+          <button type="button" data-add-step>Add Step</button>
+          <button type="button" data-save-steps>Save Steps</button>
+        </div>
+
+        <p id="step-message" aria-live="polite"></p>
+      </section>
+
     </main>
 
     <script src="{{ url_for('static', filename='edit_recipe.js') }}"></script>

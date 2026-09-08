@@ -447,6 +447,77 @@ h3 {
   outline-offset: 3px;
 }
 
+.step-editor-list {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step-editor-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem;
+  border: 1px solid #cdbfa7;
+  border-radius: 0.75rem;
+  background: rgba(255, 252, 244, 0.72);
+}
+
+.step-editor-list textarea {
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #9c8061;
+  border-radius: 0.5rem;
+  background: #fffdf7;
+  color: #252219;
+  font: inherit;
+  resize: vertical;
+}
+
+.step-editor-number {
+  color: #a24725;
+  font: 800 0.85rem Arial, sans-serif;
+}
+
+.step-row-actions,
+.step-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.step-editor-actions {
+  margin-top: 1rem;
+}
+
+#step-message {
+  min-height: 1.2rem;
+  margin: 0.65rem 0 0;
+  color: #665d4c;
+  font: 700 0.8rem/1.4 Arial, sans-serif;
+}
+
+.step-editor-actions button,
+.step-row-actions button {
+  padding: 0.55rem 0.8rem;
+  border: 1px solid #173e2c;
+  border-radius: 999px;
+  background: transparent;
+  color: #173e2c;
+  font: 700 0.8rem Arial, sans-serif;
+  cursor: pointer;
+}
+
+.step-editor-actions button:hover,
+.step-row-actions button:hover {
+  background: #173e2c;
+  color: #fffdf7;
+}
+
 @media (max-width: 760px) {
   .site-header span {
     display: none;

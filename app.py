@@ -9,6 +9,7 @@ from database.recipe_repository import (
     delete_recipe,
     get_recipe,
     list_recipes,
+    replace_recipe_steps,
     create_ingredient,
     list_ingredients,
     update_recipe_ingredient,
@@ -173,6 +174,35 @@ def create_app(test_config=None):
             return jsonify(error="Recipe ingredient not found."), 404
 
         return "", 204
+
+    @app.put("/api/recipes/<int:recipe_id>/steps")
+    def recipe_steps_replace(recipe_id):
+        step_data = request.get_json(silent=True)
+
+        if not isinstance(step_data, dict) or not isinstance(
+            step_data.get("steps"),
+            list,
+        ):
+            return jsonify(error="Recipe steps are required."), 400
+
+        instructions = step_data["steps"]
+
+        if any(
+            not isinstance(instruction, str) or not instruction.strip()
+            for instruction in instructions
+        ):
+            return jsonify(error="Every recipe step requires instructions."), 400
+
+        steps = replace_recipe_steps(
+            app.config["DATABASE_PATH"],
+            recipe_id,
+            instructions,
+        )
+
+        if steps is None:
+            return jsonify(error="Recipe not found."), 404
+
+        return jsonify(steps)
 
     @app.post("/api/recipes/<int:recipe_id>/tags")
     def recipe_tag_create(recipe_id):
