@@ -253,6 +253,7 @@ h3 {
 .primary-link:focus-visible,
 .recipe-form input:focus-visible,
 .recipe-form textarea:focus-visible,
+.recipe-form select:focus-visible,
 .recipe-form button:focus-visible {
   outline: 3px solid #cb6f39;
   outline-offset: 3px;
@@ -275,7 +276,8 @@ h3 {
 }
 
 .recipe-form input,
-.recipe-form textarea {
+.recipe-form textarea,
+.recipe-form select {
   width: 100%;
   padding: 0.85rem 1rem;
   border: 1px solid #9c8061;
@@ -302,6 +304,54 @@ h3 {
 
 .form-page .recipe-form {
   max-width: none;
+}
+
+.relationship-editor {
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+}
+
+.ingredient-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.9fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.ingredient-editor-grid .recipe-form {
+  max-width: none;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.relationship-editor .measurement {
+  font-weight: 800;
+}
+
+.relationship-editor .ingredient-list li {
+  grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.relationship-editor .ingredient-empty-message {
+  display: block;
+  white-space: nowrap;
+}
+
+.ingredient-remove-button {
+  padding: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: #8b2d20;
+  font: 700 0.8rem Arial, sans-serif;
+  cursor: pointer;
+}
+
+.ingredient-remove-button:hover {
+  text-decoration: underline;
+}
+
+.ingredient-remove-button:focus-visible {
+  outline: 3px solid #cb6f39;
+  outline-offset: 2px;
 }
 
 .recipe-meta {
@@ -420,4 +470,9 @@ h3 {
   .landing-shell {
     padding: 3rem 0;
   }
+
+  .ingredient-editor-grid {
+    grid-template-columns: 1fr;
+  }
+
 }

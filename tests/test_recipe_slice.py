@@ -300,6 +300,44 @@ class RecipeDetailSliceTests(unittest.TestCase):
             {"error": "Recipe data is required."},
         )
 
+    def test_ingredient_list_api_returns_reusable_ingredients(self):
+        response = self.client.get("/api/ingredients")
+        ingredients = response.get_json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(ingredients), 14)
+        self.assertIn(
+            {
+                "id": 1,
+                "name": "Long-grain rice, rinsed",
+            },
+            ingredients,
+        )
+
+    def test_create_ingredient_api_adds_a_reusable_ingredient(self):
+        response = self.client.post(
+            "/api/ingredients",
+            json={"name": "Fresh ginger"},
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response.get_json(),
+            {
+                "id": 15,
+                "name": "Fresh ginger",
+            },
+        )
+
+        ingredients = self.client.get("/api/ingredients").get_json()
+        self.assertIn(
+            {
+                "id": 15,
+                "name": "Fresh ginger",
+            },
+            ingredients,
+        )
+
     def test_attach_ingredient_api_adds_it_to_the_recipe(self):
         with sqlite3.connect(self.database_path) as connection:
             connection.execute(
@@ -360,6 +398,36 @@ class RecipeDetailSliceTests(unittest.TestCase):
 
         self.assertIsNotNone(reusable_ingredient)
 
+    def test_update_recipe_ingredient_api_changes_amount_and_unit(self):
+        response = self.client.patch(
+            "/api/recipes/1/ingredients/1",
+            json={
+                "amount": "3",
+                "unit": "cups",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.get_json(),
+            {
+                "id": 1,
+                "name": "Long-grain rice, rinsed",
+                "amount": "3",
+                "unit": "cups",
+            },
+        )
+
+        saved_recipe = self.client.get("/api/recipes/1").get_json()
+        updated_ingredient = next(
+            ingredient
+            for ingredient in saved_recipe["ingredients"]
+            if ingredient["id"] == 1
+        )
+
+        self.assertEqual(updated_ingredient["amount"], "3")
+        self.assertEqual(updated_ingredient["unit"], "cups")
+
     def test_edit_recipe_page_includes_requested_recipe_id(self):
         response = self.client.get("/recipes/1/edit")
 
@@ -368,6 +436,13 @@ class RecipeDetailSliceTests(unittest.TestCase):
         self.assertIn(b'data-recipe-id="1"', response.data)
         self.assertIn(b"edit_recipe.js", response.data)
         self.assertIn(b'name="cook_time"', response.data)
+        self.assertIn(b"Ingredients", response.data)
+        self.assertIn(b"data-ingredient-list", response.data)
+        self.assertIn(b'id="ingredient-form"', response.data)
+        self.assertIn(b'name="ingredient_id"', response.data)
+        self.assertIn(b'name="ingredient_name"', response.data)
+        self.assertIn(b'name="amount"', response.data)
+        self.assertIn(b'name="unit"', response.data)
 
     def test_tag_relationship_api_attaches_and_removes_a_reusable_tag(self):
         with sqlite3.connect(self.database_path) as connection:

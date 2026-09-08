@@ -9,6 +9,9 @@ from database.recipe_repository import (
     delete_recipe,
     get_recipe,
     list_recipes,
+    create_ingredient,
+    list_ingredients,
+    update_recipe_ingredient,
     remove_recipe_ingredient,
     remove_recipe_note,
     remove_recipe_tag,
@@ -119,6 +122,20 @@ def create_app(test_config=None):
             return jsonify(error="Recipe not found."), 404
         return jsonify(recipe)
 
+    @app.get("/api/ingredients")
+    def ingredient_list():
+        ingredients = list_ingredients(app.config["DATABASE_PATH"])
+        return jsonify(ingredients)
+
+    @app.post("/api/ingredients")
+    def ingredient_create():
+        ingredient_data = request.get_json(silent=True)
+        ingredient = create_ingredient(
+            app.config["DATABASE_PATH"],
+            ingredient_data,
+        )
+        return jsonify(ingredient), 201
+
     @app.post("/api/recipes/<int:recipe_id>/ingredients")
     def recipe_ingredient_create(recipe_id):
         ingredient_data = request.get_json(silent=True)
@@ -128,6 +145,21 @@ def create_app(test_config=None):
             ingredient_data,
         )
         return jsonify(ingredient), 201
+
+    @app.patch("/api/recipes/<int:recipe_id>/ingredients/<int:ingredient_id>")
+    def recipe_ingredient_update(recipe_id, ingredient_id):
+        ingredient_data = request.get_json(silent=True)
+        ingredient = update_recipe_ingredient(
+            app.config["DATABASE_PATH"],
+            recipe_id,
+            ingredient_id,
+            ingredient_data,
+        )
+
+        if ingredient is None:
+            return jsonify(error="Recipe ingredient not found."), 404
+
+        return jsonify(ingredient)
 
     @app.delete("/api/recipes/<int:recipe_id>/ingredients/<int:ingredient_id>")
     def recipe_ingredient_delete(recipe_id, ingredient_id):

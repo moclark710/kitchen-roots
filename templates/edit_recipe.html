@@ -52,12 +52,54 @@
           min="0"
           required
         >
-
         <button type="submit">Update Recipe</button>
         <p id="form-message" aria-live="polite">
           Loading recipe...
         </p>
       </form>
+
+      <section class="relationship-editor">
+        <p class="section-label">What you'll need</p>
+        <h2>Ingredients</h2>
+        <div class="ingredient-editor-grid">
+          <ul class="ingredient-list" data-ingredient-list>
+            <li>Loading ingredients...</li>
+          </ul>
+
+          <form id="ingredient-form" class="recipe-form">
+            <label for="ingredient-id">Choose an existing ingredient</label>
+            <select id="ingredient-id" name="ingredient_id">
+              <option value="">Choose an ingredient</option>
+            </select>
+
+            <label for="ingredient-name">Or create a new ingredient</label>
+            <input
+              id="ingredient-name"
+              name="ingredient_name"
+              type="text"
+            >
+
+            <label for="ingredient-amount">Amount</label>
+            <input
+              id="ingredient-amount"
+              name="amount"
+              type="text"
+              required
+            >
+
+            <label for="ingredient-unit">Unit</label>
+            <input
+              id="ingredient-unit"
+              name="unit"
+              type="text"
+              required
+            >
+
+            <button type="submit">Save Ingredient</button>
+            <p id="ingredient-message" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
     </main>
 
     <script src="{{ url_for('static', filename='edit_recipe.js') }}"></script>

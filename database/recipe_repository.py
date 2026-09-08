@@ -41,6 +41,41 @@ def list_recipes(database_path):
     ]
 
 
+def list_ingredients(database_path):
+    """Return every reusable ingredient in alphabetical order."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+
+        ingredients = connection.execute(
+            """
+            SELECT id, name
+            FROM ingredient
+            ORDER BY name
+            """
+        ).fetchall()
+
+    return [dict(ingredient) for ingredient in ingredients]
+
+
+def create_ingredient(database_path, ingredient_data):
+    """Create and return a reusable ingredient."""
+    with sqlite3.connect(database_path) as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO ingredient (name)
+            VALUES (?)
+            """,
+            (ingredient_data["name"],),
+        )
+
+        ingredient = {
+            "id": cursor.lastrowid,
+            "name": ingredient_data["name"],
+        }
+
+    return ingredient
+
+
 def get_recipe(database_path, recipe_id):
     """Return one complete recipe as a dictionary, or None when it does not exist."""
     with sqlite3.connect(database_path) as connection:
@@ -246,6 +281,54 @@ def attach_recipe_ingredient(database_path, recipe_id, ingredient_data):
                 recipe_id,
                 ingredient_data["ingredient_id"],
             ),
+        ).fetchone()
+
+    return dict(ingredient)
+
+
+def update_recipe_ingredient(
+    database_path,
+    recipe_id,
+    ingredient_id,
+    ingredient_data,
+):
+    """Update and return a recipe ingredient relationship."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        cursor = connection.execute(
+            """
+            UPDATE recipe_ingredient
+            SET amount = ?, unit = ?
+            WHERE recipe_id = ?
+              AND ingredient_id = ?
+            """,
+            (
+                ingredient_data["amount"],
+                ingredient_data["unit"],
+                recipe_id,
+                ingredient_id,
+            ),
+        )
+
+        if cursor.rowcount == 0:
+            return None
+
+        ingredient = connection.execute(
+            """
+            SELECT
+                ingredient.id,
+                ingredient.name,
+                recipe_ingredient.amount,
+                recipe_ingredient.unit
+            FROM recipe_ingredient
+            JOIN ingredient
+                ON ingredient.id = recipe_ingredient.ingredient_id
+            WHERE recipe_ingredient.recipe_id = ?
+              AND recipe_ingredient.ingredient_id = ?
+            """,
+            (recipe_id, ingredient_id),
         ).fetchone()
 
     return dict(ingredient)
