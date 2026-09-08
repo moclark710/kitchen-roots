@@ -203,7 +203,18 @@
         </div>
       </section>
 
+      <nav class="editor-completion" aria-label="Finish editing recipe">
+        <a class="primary-link" href="/recipes/{{ recipe_id }}">
+          View Recipe
+        </a>
+        <a class="secondary-link" href="/recipes">
+          Back to Recipe Collection
+        </a>
+      </nav>
+
     </main>
+
+    {% include "_site_footer.html" %}
 
     <script src="{{ url_for('static', filename='edit_recipe.js') }}"></script>
   </body>

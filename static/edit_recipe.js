@@ -96,6 +96,10 @@ function renderIngredients(ingredients) {
     removeButton.type = "button";
     removeButton.className = "ingredient-remove-button";
     removeButton.textContent = "Remove";
+    removeButton.setAttribute(
+      "aria-label",
+      `Remove ${ingredient.name} from this recipe`
+    );
 
     removeButton.addEventListener("click", () => {
       removeIngredient(ingredient.id);
@@ -192,6 +196,7 @@ function renderStepEditor(steps) {
     moveUpButton.type = "button";
     moveUpButton.textContent = "Move up";
     moveUpButton.disabled = index === 0;
+    moveUpButton.setAttribute("aria-label", `Move step ${index + 1} up`);
 
     moveUpButton.addEventListener("click", () => {
       [currentSteps[index - 1], currentSteps[index]] = [
@@ -207,6 +212,10 @@ function renderStepEditor(steps) {
     moveDownButton.type = "button";
     moveDownButton.textContent = "Move down";
     moveDownButton.disabled = index === currentSteps.length - 1;
+    moveDownButton.setAttribute(
+      "aria-label",
+      `Move step ${index + 1} down`
+    );
 
     moveDownButton.addEventListener("click", () => {
       [currentSteps[index], currentSteps[index + 1]] = [
@@ -221,6 +230,7 @@ function renderStepEditor(steps) {
     const removeButton = document.createElement("button");
     removeButton.type = "button";
     removeButton.textContent = "Remove";
+    removeButton.setAttribute("aria-label", `Remove step ${index + 1}`);
 
     removeButton.addEventListener("click", () => {
       currentSteps.splice(index, 1);
@@ -289,6 +299,10 @@ function renderTags(tags) {
     const removeButton = document.createElement("button");
     removeButton.type = "button";
     removeButton.textContent = "Remove";
+    removeButton.setAttribute(
+      "aria-label",
+      `Remove ${tag.name} tag from this recipe`
+    );
     removeButton.addEventListener("click", () => removeTag(tag.id));
 
     item.append(label, type, removeButton);
@@ -368,6 +382,10 @@ function renderNotes(notes) {
     const removeButton = document.createElement("button");
     removeButton.type = "button";
     removeButton.textContent = "Remove";
+    removeButton.setAttribute(
+      "aria-label",
+      `Remove ${note.title} note from this recipe`
+    );
     removeButton.addEventListener("click", () => removeNote(note.id));
 
     content.append(type, title, body);
