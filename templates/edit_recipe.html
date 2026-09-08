@@ -169,23 +169,30 @@
             <select id="note-id" name="note_id">
               <option value="">Choose a note</option>
             </select>
+            <article id="note-preview" class="note-selection-preview" hidden>
+              <p class="note-type" data-note-preview-type></p>
+              <h3 data-note-preview-title></h3>
+              <p data-note-preview-body></p>
+            </article>
 
             <label for="note-title">Or create a new note</label>
             <input id="note-title" name="note_title" type="text">
 
             <label for="note-type">Note type</label>
-            <input
+            <select
               id="note-type"
               name="note_type"
-              type="text"
-              list="note-type-options"
+              aria-describedby="note-type-help"
             >
-            <datalist id="note-type-options">
-              <option value="family"></option>
-              <option value="region"></option>
-              <option value="heritage"></option>
-              <option value="technical"></option>
-            </datalist>
+              <option value="">Choose a note type</option>
+              <option value="family">Family story</option>
+              <option value="region">Regional context</option>
+              <option value="heritage">Heritage</option>
+              <option value="technical">Cooking technique</option>
+            </select>
+            <p id="note-type-help" class="field-help">
+              Choose what kind of knowledge or story this note preserves.
+            </p>
 
             <label for="note-body">Note</label>
             <textarea id="note-body" name="note_body"></textarea>

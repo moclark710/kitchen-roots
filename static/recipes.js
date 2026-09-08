@@ -1,6 +1,7 @@
 const recipeList = document.querySelector("#recipe-list");
 const tagFilterForm = document.querySelector("#tag-filter-form");
 const tagFilterSelect = document.querySelector("#tag-filter");
+const recipeSearchInput = document.querySelector("#recipe-search");
 const clearFilterButton = document.querySelector("[data-clear-filter]");
 const filterMessage = document.querySelector("#filter-message");
 
@@ -45,12 +46,28 @@ async function loadTagFilters() {
   }
 }
 
-async function loadRecipes(tagId = "") {
-  recipeList.innerHTML = '<p class="loading">Loading recipes...</p>';
+async function loadRecipes(tagId = "", searchQuery = "") {
+  const loadingMessage = document.createElement("p");
+  loadingMessage.className = "loading";
+  loadingMessage.textContent = "Loading recipes...";
+  recipeList.className = "recipe-list";
+  recipeList.replaceChildren(loadingMessage);
 
   try {
-    const query = tagId ? `?tag_id=${encodeURIComponent(tagId)}` : "";
-    const response = await fetch(`/api/recipes${query}`);
+    const query = new URLSearchParams();
+
+    if (tagId) {
+      query.set("tag_id", tagId);
+    }
+
+    if (searchQuery) {
+      query.set("q", searchQuery);
+    }
+
+    const queryString = query.toString();
+    const response = await fetch(
+      `/api/recipes${queryString ? `?${queryString}` : ""}`
+    );
     const recipes = await response.json();
 
     if (!response.ok) {
@@ -58,8 +75,8 @@ async function loadRecipes(tagId = "") {
     }
 
     if (recipes.length === 0) {
-      recipeList.textContent = tagId
-        ? "No recipes match this tag."
+      recipeList.textContent = tagId || searchQuery
+        ? "No recipes match your search and filters."
         : "No recipes are available yet.";
       return;
     }
@@ -75,16 +92,27 @@ async function loadRecipes(tagId = "") {
 tagFilterForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const selectedOption = tagFilterSelect.selectedOptions[0];
+  const searchQuery = recipeSearchInput.value.trim();
+  const activeFilters = [];
 
-  filterMessage.textContent = tagFilterSelect.value
-    ? `Showing recipes tagged ${selectedOption.textContent}.`
+  if (searchQuery) {
+    activeFilters.push(`with a title matching “${searchQuery}”`);
+  }
+
+  if (tagFilterSelect.value) {
+    activeFilters.push(`tagged ${selectedOption.textContent}`);
+  }
+
+  filterMessage.textContent = activeFilters.length
+    ? `Showing recipes ${activeFilters.join(" and ")}.`
     : "Showing all recipes.";
 
-  loadRecipes(tagFilterSelect.value);
+  loadRecipes(tagFilterSelect.value, searchQuery);
 });
 
 clearFilterButton.addEventListener("click", () => {
   tagFilterSelect.value = "";
+  recipeSearchInput.value = "";
   filterMessage.textContent = "Showing all recipes.";
   loadRecipes();
 });

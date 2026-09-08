@@ -26,6 +26,10 @@ const tagMessage = document.querySelector("#tag-message");
 const noteEditorList = document.querySelector("[data-note-editor-list]");
 const noteForm = document.querySelector("#note-form");
 const noteSelect = document.querySelector("#note-id");
+const notePreview = document.querySelector("#note-preview");
+const notePreviewType = document.querySelector("[data-note-preview-type]");
+const notePreviewTitle = document.querySelector("[data-note-preview-title]");
+const notePreviewBody = document.querySelector("[data-note-preview-body]");
 const noteTitleInput = document.querySelector("#note-title");
 const noteTypeInput = document.querySelector("#note-type");
 const noteBodyInput = document.querySelector("#note-body");
@@ -35,6 +39,7 @@ let currentIngredients = [];
 let currentSteps = [];
 let currentTags = [];
 let currentNotes = [];
+let availableNotes = [];
 
 async function removeIngredient(ingredientId) {
   const confirmed = window.confirm(
@@ -380,6 +385,7 @@ async function loadNoteOptions() {
       throw new Error(notes.error || "Unable to load note choices.");
     }
 
+    availableNotes = notes;
     noteSelect.length = 1;
 
     notes.forEach((note) => {
@@ -660,16 +666,27 @@ tagForm.addEventListener("submit", async (event) => {
 });
 
 noteSelect.addEventListener("change", () => {
-  if (noteSelect.value) {
+  const selectedNote = availableNotes.find(
+    (note) => note.id === Number(noteSelect.value)
+  );
+
+  if (selectedNote) {
     noteTitleInput.value = "";
     noteTypeInput.value = "";
     noteBodyInput.value = "";
+    notePreviewType.textContent = selectedNote.note_type;
+    notePreviewTitle.textContent = selectedNote.title;
+    notePreviewBody.textContent = selectedNote.body;
+    notePreview.hidden = false;
+  } else {
+    notePreview.hidden = true;
   }
 });
 
 noteTitleInput.addEventListener("input", () => {
   if (noteTitleInput.value.trim()) {
     noteSelect.value = "";
+    notePreview.hidden = true;
   }
 });
 
@@ -732,6 +749,7 @@ noteForm.addEventListener("submit", async (event) => {
     }
 
     noteForm.reset();
+    notePreview.hidden = true;
     await loadRecipeForEditing();
     await loadNoteOptions();
     noteMessage.textContent = "Note saved.";

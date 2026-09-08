@@ -100,6 +100,7 @@ def create_app(test_config=None):
     @app.get("/api/recipes")
     def recipe_list():
         tag_value = request.args.get("tag_id")
+        search_query = request.args.get("q", "").strip()
         tag_id = None
 
         if tag_value:
@@ -114,6 +115,7 @@ def create_app(test_config=None):
         recipes = list_recipes(
             app.config["DATABASE_PATH"],
             tag_id=tag_id,
+            search=search_query or None,
         )
         return jsonify(recipes)
 

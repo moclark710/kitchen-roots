@@ -1,8 +1,8 @@
 import sqlite3
 
 
-def list_recipes(database_path, tag_id=None):
-    """Return recipe summaries, optionally limited to one reusable tag."""
+def list_recipes(database_path, tag_id=None, search=None):
+    """Return recipe summaries, optionally filtered by tag and title."""
     with sqlite3.connect(database_path) as connection:
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
@@ -20,16 +20,24 @@ def list_recipes(database_path, tag_id=None):
                 user.name AS user_name
             FROM recipe
             JOIN user ON user.id = recipe.user_id
-            WHERE ? IS NULL
-               OR EXISTS (
+            WHERE (
+                ? IS NULL
+                OR EXISTS (
                     SELECT 1
                     FROM recipe_tag
                     WHERE recipe_tag.recipe_id = recipe.id
                       AND recipe_tag.tag_id = ?
-               )
+                )
+            )
+              AND (? IS NULL OR recipe.title LIKE ?)
             ORDER BY recipe.title
             """,
-            (tag_id, tag_id),
+            (
+                tag_id,
+                tag_id,
+                search,
+                f"%{search}%" if search else None,
+            ),
         ).fetchall()
 
     return [

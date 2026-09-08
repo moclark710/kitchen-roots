@@ -31,7 +31,7 @@ recipeForm.addEventListener("submit", async (event) => {
       throw new Error(data.error || "Unable to save this recipe.");
     }
 
-    window.location.href = `/recipes/${data.id}`;
+    window.location.href = `/recipes/${data.id}/edit`;
   } catch (error) {
     formMessage.textContent = error.message;
   }

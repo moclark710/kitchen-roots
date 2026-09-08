@@ -251,6 +251,7 @@ h3 {
   gap: 0.75rem;
 }
 
+.collection-filter input,
 .collection-filter select {
   min-width: min(100%, 18rem);
   padding: 0.8rem 1rem;
@@ -282,6 +283,7 @@ h3 {
   color: #fffdf7;
 }
 
+.collection-filter input:focus-visible,
 .collection-filter select:focus-visible,
 .collection-filter button:focus-visible {
   outline: 3px solid #cb6f39;
@@ -338,6 +340,12 @@ h3 {
   margin-top: 0.75rem;
   color: #173e2c;
   font: 700 0.85rem Arial, sans-serif;
+}
+
+.field-help {
+  margin: -0.25rem 0 0;
+  color: #665d4c;
+  font: 0.78rem/1.4 Arial, sans-serif;
 }
 
 .recipe-form input,
@@ -452,6 +460,22 @@ h3 {
 .note-editor-grid .recipe-form {
   max-width: none;
   padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.note-selection-preview {
+  padding: 1rem;
+  border-left: 3px solid #cb6f39;
+  background: #eee2cb;
+}
+
+.note-selection-preview h3 {
+  margin-bottom: 0.5rem;
+}
+
+.note-selection-preview p:last-child {
+  margin-bottom: 0;
+  line-height: 1.5;
+  white-space: pre-wrap;
 }
 
 .note-editor-list {
