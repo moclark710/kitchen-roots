@@ -155,6 +155,47 @@
         </div>
       </section>
 
+      <section class="relationship-editor">
+        <p class="section-label">Preserve the story</p>
+        <h2>Recipe Notes</h2>
+
+        <div class="note-editor-grid">
+          <ul class="note-editor-list" data-note-editor-list>
+            <li>Loading recipe notes...</li>
+          </ul>
+
+          <form id="note-form" class="recipe-form">
+            <label for="note-id">Choose an existing note</label>
+            <select id="note-id" name="note_id">
+              <option value="">Choose a note</option>
+            </select>
+
+            <label for="note-title">Or create a new note</label>
+            <input id="note-title" name="note_title" type="text">
+
+            <label for="note-type">Note type</label>
+            <input
+              id="note-type"
+              name="note_type"
+              type="text"
+              list="note-type-options"
+            >
+            <datalist id="note-type-options">
+              <option value="family"></option>
+              <option value="region"></option>
+              <option value="heritage"></option>
+              <option value="technical"></option>
+            </datalist>
+
+            <label for="note-body">Note</label>
+            <textarea id="note-body" name="note_body"></textarea>
+
+            <button type="submit">Save Note</button>
+            <p id="note-message" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
     </main>
 
     <script src="{{ url_for('static', filename='edit_recipe.js') }}"></script>

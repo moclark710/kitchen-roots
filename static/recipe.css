@@ -442,6 +442,71 @@ h3 {
   font: 700 0.8rem/1.4 Arial, sans-serif;
 }
 
+.note-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.9fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.note-editor-grid .recipe-form {
+  max-width: none;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.note-editor-list {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.note-editor-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-left: 3px solid #cb6f39;
+  background: #eee2cb;
+}
+
+.note-editor-list h3 {
+  margin-bottom: 0.5rem;
+}
+
+.note-editor-body {
+  margin-bottom: 0;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.note-editor-list button {
+  align-self: start;
+  padding: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: #8b2d20;
+  font: 700 0.8rem Arial, sans-serif;
+  cursor: pointer;
+}
+
+.note-editor-list button:hover {
+  text-decoration: underline;
+}
+
+.note-editor-list button:focus-visible {
+  outline: 3px solid #cb6f39;
+  outline-offset: 2px;
+}
+
+#note-message {
+  min-height: 1.2rem;
+  margin: 0;
+  color: #665d4c;
+  font: 700 0.8rem/1.4 Arial, sans-serif;
+}
+
 .ingredient-editor-grid .recipe-form {
   max-width: none;
   padding: clamp(1.25rem, 3vw, 2rem);
@@ -668,7 +733,8 @@ h3 {
   }
 
   .ingredient-editor-grid,
-  .tag-editor-grid {
+  .tag-editor-grid,
+  .note-editor-grid {
     grid-template-columns: 1fr;
   }
 

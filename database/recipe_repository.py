@@ -120,6 +120,47 @@ def create_tag(database_path, tag_data):
     return tag
 
 
+def list_notes(database_path):
+    """Return every reusable note in alphabetical order."""
+    with sqlite3.connect(database_path) as connection:
+        connection.row_factory = sqlite3.Row
+
+        notes = connection.execute(
+            """
+            SELECT id, title, note_type, body
+            FROM note
+            ORDER BY title
+            """
+        ).fetchall()
+
+    return [dict(note) for note in notes]
+
+
+def create_note(database_path, note_data):
+    """Create and return a reusable note without altering its body text."""
+    with sqlite3.connect(database_path) as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO note (title, note_type, body)
+            VALUES (?, ?, ?)
+            """,
+            (
+                note_data["title"],
+                note_data["note_type"],
+                note_data["body"],
+            ),
+        )
+
+        note = {
+            "id": cursor.lastrowid,
+            "title": note_data["title"],
+            "note_type": note_data["note_type"],
+            "body": note_data["body"],
+        }
+
+    return note
+
+
 def get_recipe(database_path, recipe_id):
     """Return one complete recipe as a dictionary, or None when it does not exist."""
     with sqlite3.connect(database_path) as connection:

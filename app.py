@@ -5,6 +5,7 @@ from database.recipe_repository import (
     attach_recipe_ingredient,
     attach_recipe_note,
     attach_recipe_tag,
+    create_note,
     create_tag,
     create_recipe,
     delete_recipe,
@@ -13,6 +14,7 @@ from database.recipe_repository import (
     replace_recipe_steps,
     create_ingredient,
     list_ingredients,
+    list_notes,
     list_tags,
     update_recipe_ingredient,
     remove_recipe_ingredient,
@@ -183,6 +185,41 @@ def create_app(test_config=None):
             },
         )
         return jsonify(tag), 201
+
+    @app.get("/api/notes")
+    def note_list():
+        notes = list_notes(app.config["DATABASE_PATH"])
+        return jsonify(notes)
+
+    @app.post("/api/notes")
+    def note_create():
+        note_data = request.get_json(silent=True)
+
+        if not isinstance(note_data, dict):
+            return jsonify(error="Note data is required."), 400
+
+        title = note_data.get("title")
+        note_type = note_data.get("note_type")
+        body = note_data.get("body")
+
+        if not isinstance(title, str) or not title.strip():
+            return jsonify(error="Note title is required."), 400
+
+        if not isinstance(note_type, str) or not note_type.strip():
+            return jsonify(error="Note type is required."), 400
+
+        if not isinstance(body, str) or not body.strip():
+            return jsonify(error="Note body is required."), 400
+
+        note = create_note(
+            app.config["DATABASE_PATH"],
+            {
+                "title": title.strip(),
+                "note_type": note_type.strip(),
+                "body": body,
+            },
+        )
+        return jsonify(note), 201
 
     @app.post("/api/recipes/<int:recipe_id>/ingredients")
     def recipe_ingredient_create(recipe_id):

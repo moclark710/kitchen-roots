@@ -23,10 +23,18 @@ const tagSelect = document.querySelector("#tag-id");
 const tagNameInput = document.querySelector("#tag-name");
 const tagTypeInput = document.querySelector("#tag-type");
 const tagMessage = document.querySelector("#tag-message");
+const noteEditorList = document.querySelector("[data-note-editor-list]");
+const noteForm = document.querySelector("#note-form");
+const noteSelect = document.querySelector("#note-id");
+const noteTitleInput = document.querySelector("#note-title");
+const noteTypeInput = document.querySelector("#note-type");
+const noteBodyInput = document.querySelector("#note-body");
+const noteMessage = document.querySelector("#note-message");
 
 let currentIngredients = [];
 let currentSteps = [];
 let currentTags = [];
+let currentNotes = [];
 
 async function removeIngredient(ingredientId) {
   const confirmed = window.confirm(
@@ -305,6 +313,86 @@ async function loadTagOptions() {
   }
 }
 
+async function removeNote(noteId) {
+  noteMessage.textContent = "Removing note...";
+
+  try {
+    const response = await fetch(
+      `/api/recipes/${recipeId}/notes/${noteId}`,
+      { method: "DELETE" }
+    );
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || "Unable to remove the note.");
+    }
+
+    await loadRecipeForEditing();
+    noteMessage.textContent = "Note removed.";
+  } catch (error) {
+    noteMessage.textContent = error.message;
+  }
+}
+
+function renderNotes(notes) {
+  currentNotes = notes;
+  noteEditorList.replaceChildren();
+
+  if (notes.length === 0) {
+    const emptyMessage = document.createElement("li");
+    emptyMessage.textContent = "No notes added yet.";
+    noteEditorList.append(emptyMessage);
+    return;
+  }
+
+  notes.forEach((note) => {
+    const item = document.createElement("li");
+    const content = document.createElement("div");
+
+    const type = document.createElement("p");
+    type.className = "note-type";
+    type.textContent = note.note_type;
+
+    const title = document.createElement("h3");
+    title.textContent = note.title;
+
+    const body = document.createElement("p");
+    body.className = "note-editor-body";
+    body.textContent = note.body;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () => removeNote(note.id));
+
+    content.append(type, title, body);
+    item.append(content, removeButton);
+    noteEditorList.append(item);
+  });
+}
+
+async function loadNoteOptions() {
+  try {
+    const response = await fetch("/api/notes");
+    const notes = await response.json();
+
+    if (!response.ok) {
+      throw new Error(notes.error || "Unable to load note choices.");
+    }
+
+    noteSelect.length = 1;
+
+    notes.forEach((note) => {
+      const option = document.createElement("option");
+      option.value = note.id;
+      option.textContent = `${note.title} (${note.note_type})`;
+      noteSelect.append(option);
+    });
+  } catch (error) {
+    noteMessage.textContent = error.message;
+  }
+}
+
 async function loadRecipeForEditing() {
   try {
     const response = await fetch(`/api/recipes/${recipeId}`);
@@ -321,6 +409,7 @@ async function loadRecipeForEditing() {
     renderIngredients(recipe.ingredients);
     renderStepEditor(recipe.steps);
     renderTags(recipe.tags);
+    renderNotes(recipe.notes);
     formMessage.textContent = "";
   } catch (error) {
     formMessage.textContent = error.message;
@@ -570,6 +659,88 @@ tagForm.addEventListener("submit", async (event) => {
   }
 });
 
+noteSelect.addEventListener("change", () => {
+  if (noteSelect.value) {
+    noteTitleInput.value = "";
+    noteTypeInput.value = "";
+    noteBodyInput.value = "";
+  }
+});
+
+noteTitleInput.addEventListener("input", () => {
+  if (noteTitleInput.value.trim()) {
+    noteSelect.value = "";
+  }
+});
+
+noteForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  let noteId = Number(noteSelect.value);
+  const newNoteTitle = noteTitleInput.value.trim();
+  const newNoteType = noteTypeInput.value.trim();
+  const newNoteBody = noteBodyInput.value;
+
+  if (!noteId && !newNoteTitle) {
+    noteMessage.textContent = "Choose a note or enter a new note.";
+    return;
+  }
+
+  if (newNoteTitle && (!newNoteType || !newNoteBody.trim())) {
+    noteMessage.textContent = "New notes need a type and note text.";
+    return;
+  }
+
+  if (currentNotes.some((note) => note.id === noteId)) {
+    noteMessage.textContent = "That note is already on this recipe.";
+    return;
+  }
+
+  noteMessage.textContent = "Saving note...";
+
+  try {
+    if (newNoteTitle) {
+      const createResponse = await fetch("/api/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newNoteTitle,
+          note_type: newNoteType,
+          body: newNoteBody,
+        }),
+      });
+
+      const createdNote = await createResponse.json();
+
+      if (!createResponse.ok) {
+        throw new Error(createdNote.error || "Unable to create the note.");
+      }
+
+      noteId = createdNote.id;
+    }
+
+    const attachResponse = await fetch(`/api/recipes/${recipeId}/notes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ note_id: noteId }),
+    });
+
+    const attachedNote = await attachResponse.json();
+
+    if (!attachResponse.ok) {
+      throw new Error(attachedNote.error || "Unable to attach the note.");
+    }
+
+    noteForm.reset();
+    await loadRecipeForEditing();
+    await loadNoteOptions();
+    noteMessage.textContent = "Note saved.";
+  } catch (error) {
+    noteMessage.textContent = error.message;
+  }
+});
+
 loadRecipeForEditing();
 loadIngredientOptions();
 loadTagOptions();
+loadNoteOptions();
